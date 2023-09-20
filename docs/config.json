@@ -1,0 +1,25 @@
+{
+    "title": "PHP-abstract-dbo",
+    "author": "Axel Hahn",
+    "tagline": "Base class for database driven objects. It offers CRUD actions and relations. It helps you to speed up the development your application without database queries.",
+    "ignore": {
+        "files": ["_skeleton.md"],
+        "folders": ["99_Not_Ready"]
+    },
+    "html": {
+        "auto_toc": true,
+        "auto_landing": false,
+        "date_modified": false,
+        "jump_buttons": true,
+        "edit_on_github": "axelhahn/php-abstract-dbo/tree/master/docs",
+        "edit_on_": {
+            "name": "Gitlab",
+            "basepath": "https://git-repo.iml.unibe.ch/iml-open-source/docker-php-starterkit/tree/master/docs"
+        },
+        "links": {
+            "Git Repo": "https://github.com/axelhahn/php-abstract-dbo",
+        },
+        "theme": "daux-blue",
+        "search": true
+    }
+}
