@@ -916,19 +916,19 @@ class pdo_db_base
             return false;
         }
 
-        $aReturn = [];
+        $aReturn = ['debug'=>[]];
         if (isset($this->_aProperties[$sAttr]['form'])) {
             $aReturn = $this->_aProperties[$sAttr]['form'];
-            $aReturn['_origin'] = 'fixed';
+            $aReturn['debug']['_origin'] = 'fixed';
         } else {
-            $aReturn['_origin'] = 'guess';
+            $aReturn['debug']['_origin'] = 'guess';
             preg_match('/[a-zA-Z\(\)0-9]*/', $this->_aProperties[$sAttr]['create'], $aMatches);
             $sTabletype = strtolower($aMatches[0]);
             preg_match('/([a-zA-Z]*).*\(([0-9]*)/', $sTabletype, $aMatches2);
 
             // for debugging
-            $aReturn['_dbtable'] = $sTabletype;
-            $aReturn['_dbmatch'] = $aMatches2;
+            $aReturn['debug']['_dbtable'] = $sTabletype;
+            $aReturn['debug']['_dbmatch'] = $aMatches2;
 
             $sBasetype = isset($aMatches2[1]) ? $aMatches2[1] : false;
             $iSize = isset($aMatches2[2]) ? $aMatches2[2] : false;
@@ -942,12 +942,12 @@ class pdo_db_base
                     if (isset($iSize)) {
                         if ($iSize > 1024) {
                             $aReturn['tag'] = 'textarea';
-                            $aReturn['max'] = $iSize;
+                            $aReturn['maxlength'] = $iSize;
                             $aReturn['rows'] = 5;
                         } else {
                             $aReturn['tag'] = 'input';
                             $aReturn['type'] = 'text';
-                            $aReturn['max'] = $iSize;
+                            $aReturn['maxlength'] = $iSize;
                         }
                     } else {
                         $aReturn['tag'] = 'input';
@@ -966,7 +966,7 @@ class pdo_db_base
             // print_r($aMatches); die();
 
         }
-        $aReturn['_attribute'] = $sAttr;
+        $aReturn['name'] = $sAttr;
         return $aReturn;
     }
     // ----------------------------------------------------------------------
