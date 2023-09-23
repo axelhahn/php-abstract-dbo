@@ -595,16 +595,31 @@ class pdo_db_base
                 'to_table'         => $sTable2,
                 'to_id'            => $iId2,
             ]
-            : [
-                'from_table'       => $sTable2,
-                'from_id'          => $iId2,
-                'to_table'         => $sTable1,
-                'to_id'            => $iId1,
-            ];
+            : ($sTable1 != $sTable2 
+                ? [
+                    'from_table'       => $sTable2,
+                    'from_id'          => $iId2,
+                    'to_table'         => $sTable1,
+                    'to_id'            => $iId1,
+                ]
+                :[
+                    // relation to the same table: sort order is minimal id first
+                    'from_table'       => $sTable2,
+                    'from_id'          => min($iId1, $iId2),
+                    'to_table'         => $sTable1,
+                    'to_id'            => max($iId1, $iId2),
+                ]
+            )
+            ;
         $aReturn['uuid'] = $this->_getRelationUuid($aReturn['from_table'], $aReturn['from_id'], $aReturn['to_table'], $aReturn['to_id']);
         return $aReturn;
     }
 
+    /**
+     * internal data: add a relation item to current item
+     * @param  array $aRelitem relation item array [from_table, from_id, to_table, to_id, uuid]
+     * @return bool
+     */
     protected function _addRelationToItem($aRelitem = [])
     {
         $this->_wd(__METHOD__ . '()');
@@ -629,11 +644,13 @@ class pdo_db_base
             'target' => $aTarget,
             'db' => $aRelitem,
         ];
+        return true;
     }
     /**
      * create a relation from the current item to an id of a target object
      * @param  string  $sToTable  target object
      * @param  string  $sToTable  target object
+     * @return bool
      */
     public function relCreate($sToTable, $iToId)
     {
