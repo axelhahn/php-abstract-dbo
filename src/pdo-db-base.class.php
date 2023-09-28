@@ -33,6 +33,7 @@ namespace axelhahn;
 use Exception, PDO, PDOException;
 
 // for relation table
+require_once 'pdo-db-attachments.class.php';
 require_once 'pdo-db-relations.class.php';
 require_once 'pdo-db-base.constants.php';
 
@@ -73,15 +74,21 @@ class pdo_db_base
      * relations of the current object
      * @var array
      */
-    private $_relations = [];
+    private $_aAttachments = [];
+
+    /**
+     * relations of the current object
+     * @var array
+     */
+    private $_aRelations = [];
 
     /**
      * default columns for each object type
      */
     protected $_aDefaultColumns = [
         'id'          => [
-            'create' => 'INTEGER',
-            'extra' =>  'primary key autoincrement',
+            'create' => 'INTEGER primary key autoincrement',
+            // 'extra' =>  'primary key autoincrement',
             // 'label' => 'ID',                    'descr' => '', 'type' => 'hidden',         'edit' => false,
             'dummyvalue' => 'automatic'
         ],
@@ -119,11 +126,16 @@ class pdo_db_base
         $this->_pdo = $oDB;
         if (!$this->_tableExists($this->_table)) {
             $this->_wd(__METHOD__ . ' Need to create table.');
-            $this->_createDbTable();
+            if(!$this->_createDbTable()){
+                $this->_wd(__METHOD__ . ' Error creating table.');
+                echo '<pre>';print_r($this->_pdo->queries());
+                die();
+                return false;
+            };
         }
 
         // generate item
-        $this->_relations = ($sObjectname == 'axelhahn\pdo_db_relations') ? NULL : [];
+        $this->_aRelations = ($sObjectname == 'axelhahn\pdo_db_relations') ? NULL : [];
         $this->new();
 
         return true;
@@ -184,6 +196,7 @@ class pdo_db_base
         $this->_wd(__METHOD__);
         $aSql = [
             'sqlite' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '$table';",
+            'mysql' => "SHOW TABLES LIKE '$table';"
         ];
 
         $type = $this->_pdo->driver();
@@ -228,6 +241,46 @@ class pdo_db_base
         return $_aData;
     }
 
+
+    /**
+     * set specialties for PDO queries in sifferent database types
+     * 
+     * @return array
+     */
+    private function _getPdoDbSpecialties() {
+        $aReturn = [];
+        switch ($this->_pdo->driver()) {
+            case 'mysql':
+                $aReturn = [
+                    'AUTOINCREMENT' => 'AUTO_INCREMENT',
+                    'DATETIME' => 'TIMESTAMP',
+                    'INTEGER' => 'INT',
+                    // 'TEXT' => 'LONGTEXT',
+                    
+                    'createAppend' => 'CHARACTER SET utf8 COLLATE utf8_general_ci',
+                    
+                    'canIndex' => true,
+                    'canIndexUNIQUE' => true,
+                    'canIndexFULLTEXT' => false,
+                    'canIndexSPACIAL' => false,
+                ];
+                break;
+            case 'sqlite':
+                $aReturn = [
+                    'createAppend' => '',
+                    
+                    'canIndex' => true,
+                    'canIndexUNIQUE' => true,
+                    'canIndexFULLTEXT' => false,
+                ];
+                break;
+
+            default:
+                echo __METHOD__ . ' - type ' . $this->_pdo->driver() . ' was not implemented yet.<br>';
+                die();
+        }
+        return $aReturn;
+    }    
     /**
      * create database table
      * @return bool
@@ -239,26 +292,30 @@ class pdo_db_base
             return true;
         }
 
-        // db columns are default colums + columns for my object
         $sSql = '';
+        $sSqlIndex = '';
+        $aDB=$this->_getPdoDbSpecialties();
+
+        // db columns are default colums + columns for my object
         foreach (array_merge($this->_aDefaultColumns, $this->_aProperties) as $sCol => $aData) {
             if (isset($aData['create'])) {
-                $sSql .= ($sSql ? ', ' : '')
-                    . "`$sCol` " . $aData['create']
-                    . (isset($aData['extra']) ? ' ' . $aData['extra'] : '');
+                $sColumnType= str_ireplace(array_keys($aDB), array_values($aDB), $aData['create']);
+                $sSql .= ($sSql ? ",\n" : '')
+                        ."    $sCol {$sColumnType}";                
+                // $sSql .= ($sSql ? ', ' : '')
+                //     . "$sCol " . $aData['create']
+                //     . (isset($aData['extra']) ? ' ' . $aData['extra'] : '');
             }
         }
-        $sSql = "CREATE TABLE \"" . $this->_table . "\" ($sSql);";
+        $sSql = "CREATE TABLE " . $this->_table . " ($sSql)\n;";
         $this->makeQuery($sSql);
-        if ($this->_tableExists($this->_table)) {
-            echo __METHOD__ . ' created table ' . $this->_table . '<br>';
-            return true;
+        if (!$this->_tableExists($this->_table)) {
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to create {' . $this->_table . '}.');
+            return false;
         }
-        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to create {' . $this->_table . '}.');
-        return false;
+        // echo __METHOD__ . ' created table ' . $this->_table . '<br>';
+        return true;
 
-        // TODO: verify columns
-        // PRAGMA table_info(table_name);
     }
 
     /**
@@ -268,60 +325,57 @@ class pdo_db_base
     {
 
         $this->_wd(__METHOD__);
-        $aSql = [
-            'sqlite' => 'PRAGMA table_info(' . $this->_table . ')',
-            'mysql' => 'describe "' . $this->_table . '"',
+        $aDbSpecifics = [
+            'sqlite' => [ 'sql' => 'PRAGMA table_info(' . $this->_table . ')', 'key4column'=>'name',  'key4type' => 'type', ],
+            'mysql' =>  [ 'sql' => 'describe ' . $this->_table . ';',          'key4column'=>'Field', 'key4type' => 'Type', ],
         ];
 
-        /*
-
-        https://www.sqlite.org/lang_altertable.html
-        sqlite supports alter table on column:
-            - rename
-            - add
-            - drop
-
-        https://www.w3schools.com/SQl/sql_alter.asp
-        Mysql also allows to change datatype    
-        
-        */
 
         $type = $this->_pdo->driver();
-        if (!isset($aSql[$type])) {
+        if (!isset($aDbSpecifics[$type])) {
             die("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
         }
 
-        $result = $this->makeQuery($aSql[$type]);
+        $result = $this->makeQuery($aDbSpecifics[$type]['sql']);
+        // echo '<pre>'; print_r($result); echo '</pre>';
         if (!$result || !count($result)) {
-            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Unable to get table infos by sql query: ' . $aSql[$type] . '');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Unable to get table infos by sql query: ' . $aDbSpecifics[$type]['sql'] . '');
             return false;
         }
+        $aDB=$this->_getPdoDbSpecialties();
         $aReturn = ['_result' => ['errors' => 0, 'ok' => 0, 'messages' => []], 'tables' => []];
         $aCols = [];
-
-        // put names into key
-        foreach ($result as $aColumndef) {
-            $aCols[$aColumndef['name']] = $aColumndef;
-        }
         $iOK = 0;
         $iErrors = 0;
         $aMessages = [];
+
+        // put names into key
+        foreach ($result as $aColumndef) {
+            $aCols[$aColumndef[$aDbSpecifics[$type]['key4column']]] = [
+                'column'          => $aColumndef[$aDbSpecifics[$type]['key4column']],
+                'type'            => false,
+                'type_translated' => strtolower(str_ireplace(array_keys($aDB), array_values($aDB), $aColumndef[$aDbSpecifics[$type]['key4type']])),
+                'type_current'    => strtolower($aColumndef[$aDbSpecifics[$type]['key4type']]),
+            ];
+        }
+
         $aAllTables = array_merge($this->_aDefaultColumns, $this->_aProperties);
         foreach ($aAllTables as $sColumn => $aData) {
-            if (!isset($aCols[$sColumn]['type'])) {
+            $aCols[$sColumn]['type']=$aData['create'];
+            if (!isset($aCols[$sColumn])) {
                 $iErrors++;
                 $aReturn['tables'][$sColumn] = [
                     'error' => 1,
                 ];
                 $aMessages[] = 'Database column [' . $sColumn . '] is missing.';
-            } elseif ($aData['create'] !== $aCols[$sColumn]['type']) {
+            } elseif ($aCols[$sColumn]['type_translated'] !== $aCols[$sColumn]['type_current']) {
                 $iErrors++;
                 $aReturn['tables'][$sColumn] = [
                     'error' => 1,
                     'is' => $aData['create'],
                     'must' => $aCols[$sColumn]['type'],
                 ];
-                $aMessages[] = 'Type of database column [' . $sColumn . '] is wrong. Alter table to [' . $aCols[$sColumn]['type'] . ']';
+                $aMessages[] = 'Type of database column [' . $sColumn . '] is wrong. Alter table ['.$aData['create'].'] to [' . $aCols[$sColumn]['type'] . ']';
             } else {
                 $iOK++;
                 $aReturn['tables'][$sColumn] = [
@@ -330,6 +384,7 @@ class pdo_db_base
                 ];
             };
         }
+        // echo '<pre style="margin-left: 20em;">'; print_r($aCols); echo '</pre>';
 
         foreach ($aCols as $sColumn => $aData) {
             if (!isset($aAllTables[$sColumn])) {
@@ -345,13 +400,6 @@ class pdo_db_base
         $aReturn['_result']['messages'] = $aMessages;
 
         return $aReturn;
-        /*
-        echo '<pre>'; 
-        print_r($aReturn); 
-        die();
-        */
-
-        //return $result ? !!count($result) : false;
 
     }
 
@@ -393,14 +441,14 @@ class pdo_db_base
         foreach (array_keys($this->_aProperties) as $sKey) {
             $this->_aItem[$sKey] = false;
         }
-        $this->_relations = isset($this->_relations) ? [] : NULL;
+        $this->_aRelations = isset($this->_aRelations) ? [] : NULL;
         return true;
     }
 
     /**
      * create a new entry
      * @param  array  $aItem  new announcement data
-     * @return bool
+     * @return mixed bool|integer false on failure or new id on success
      */
     public function create()
     {
@@ -417,7 +465,7 @@ class pdo_db_base
         $result = $this->makeQuery($sSql, $this->_aItem);
         if (is_array($result)) {
             $this->_aItem['id'] = $this->_pdo->db->lastInsertId();
-            return true;
+            return $this->id();
         }
         $this->_log('error', __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
         return false;
@@ -427,7 +475,7 @@ class pdo_db_base
      * read an entry by given id
      * @param  array  $aItem           new announcement data
      * @param  bool   $bReadRelations  read relation while loading object? default: false
-     * @return bool
+     * @return mixed bool|integer false on failure or new id on success
      */
     public function read($iId, $bReadRelations = false)
     {
@@ -475,7 +523,7 @@ class pdo_db_base
         $sSql = 'UPDATE `' . $this->_table . '` ' . 'SET ' . $sSql . ' WHERE `id` = :id';
         $return = $this->makeQuery($sSql, $this->_aItem);
         if (is_array($return)) {
-            return true;
+            return $this->id();
         }
         return false;
     }
@@ -623,7 +671,7 @@ class pdo_db_base
     protected function _addRelationToItem($aRelitem = [])
     {
         $this->_wd(__METHOD__ . '()');
-        if (!isset($this->_relations)) {
+        if (!isset($this->_aRelations)) {
             $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, "Releations are not allowed for " . $this->_table);
             return false;
         }
@@ -640,7 +688,7 @@ class pdo_db_base
                 'to_id' => $aRelitem['from_id'],
             ];
         $sKey = $this->_getRelationKey($aTarget['to_table'], $aTarget['to_id']);
-        $this->_relations[$sKey] = [
+        $this->_aRelations[$sKey] = [
             'target' => $aTarget,
             'db' => $aRelitem,
         ];
@@ -659,12 +707,12 @@ class pdo_db_base
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
             return false;
         }
-        if (!isset($this->_relations)) {
+        if (!isset($this->_aRelations)) {
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The relation is disabled.");
             return false;
         }
 
-        if (!preg_match('/^[a-z]*$/', $sToTable)) {
+        if (!preg_match('/^[a-z_]*$/', $sToTable)) {
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target table was not set.");
             return false;
         }
@@ -680,7 +728,7 @@ class pdo_db_base
         // helper function:
         $aTmp = $this->_getRelationSortorder($this->_table, $this->id(), $sToTable, $iToId);
         $sKey = $this->_getRelationKey($sToTable, $iToId);
-        if (isset($this->_relations[$sKey])) {
+        if (isset($this->_aRelations[$sKey])) {
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The relation already exists. It has the key [$sKey].');
             return false;
         }
@@ -700,16 +748,16 @@ class pdo_db_base
 
     /**
      * Method to read relations for the current object from relations table.
-     * It sets the protected var $this->_relations.
+     * It sets the protected var $this->_aRelations.
      * This function is used in methods read() and relRead()
      * @return bool
      */
     protected function _relRead()
     {
-        if (!isset($this->_relations)) {
+        if (!isset($this->_aRelations)) {
             return false;
         }
-        $this->_relations = [];
+        $this->_aRelations = [];
         $oRelation = new pdo_db_relations($this->_pdo);
         $aRelations = $oRelation->search([
             'columns' => '*',
@@ -732,7 +780,7 @@ class pdo_db_base
                     ? 'to'
                     : 'from';
                 $sRelKey = $this->_getRelationKey($aTmp[$sTableKey . '_table'], $aTmp[$sTableKey . '_id']);
-                $this->_relations[$sRelKey] = [
+                $this->_aRelations[$sRelKey] = [
                     'table' => $aEntry[$sTableKey . '_table'],
                     'id' => $aEntry[$sTableKey . '_id'],
                     '_relid' => $aEntry['id']
@@ -749,10 +797,10 @@ class pdo_db_base
     public function relRead()
     {
         $this->_wd(__METHOD__ . '() reading relations for ' . $this->_table . ' item id ' . $this->id());
-        if (is_array($this->_relations) && !count($this->_relations)) {
+        if (is_array($this->_aRelations) && !count($this->_aRelations)) {
             $this->_relRead();
         }
-        return $this->_relations;
+        return $this->_aRelations;
     }
     /**
      * delete a single relation from current item
@@ -761,16 +809,16 @@ class pdo_db_base
      */
     public function relDelete($sRelKey)
     {
-        if (!isset($this->_relations[$sRelKey])) {
+        if (!isset($this->_aRelations[$sRelKey])) {
             $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
             return false;
         }
-        if (!isset($this->_relations[$sRelKey]['_relid'])) {
+        if (!isset($this->_aRelations[$sRelKey]['_relid'])) {
             $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
             return false;
         }
         $oRelation = new pdo_db_relations($this->_pdo);
-        return $oRelation->delete($this->_relations[$sRelKey]['_relid']);
+        return $oRelation->delete($this->_aRelations[$sRelKey]['_relid']);
     }
 
     /**
@@ -781,27 +829,27 @@ class pdo_db_base
     public function relDeleteAll($iId = false)
     {
         $this->_wd(__METHOD__ . "($iId)");
-        if (!isset($this->_relations)) {
+        if (!isset($this->_aRelations)) {
             return true;
         }
         if ($iId && $iId !== $this->id()) {
             $tmpItem = $this->_aItem;
-            $tmpRel = $this->_relations;
+            $tmpRel = $this->_aRelations;
             $this->read($iId, true);
         }
 
-        foreach (array_keys($this->_relations) as $sRelKey) {
+        foreach (array_keys($this->_aRelations) as $sRelKey) {
             if (!$this->relDelete($sRelKey)) {
                 if (isset($tmpItem)) {
                     $this->_aItem = $this->_aItem;
-                    $this->_relations = $tmpRel;
+                    $this->_aRelations = $tmpRel;
                 }
                 return false;
             };
         }
         if (isset($tmpItem)) {
             $this->_aItem = $this->_aItem;
-            $this->_relations = $tmpRel;
+            $this->_aRelations = $tmpRel;
         }
         return true;
     }
