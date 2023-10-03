@@ -11,10 +11,12 @@ class pdo_db_attachments extends pdo_db_base{
      * @var array 
      */
     protected $_aProperties = [
-        'filename'       => ['create' => 'varchar(255)','overview'=>1,],
-        'mime'           => ['create' => 'varchar(32)',],
-        'description'    => ['create' => 'varchar(2048)',],
-        'size'           => ['create' => 'int',],
+        'filename'       => ['create' => 'VARCHAR(255)','overview'=>1,],
+        'mime'           => ['create' => 'VARCHAR(32)',],
+        'description'    => ['create' => 'VARCHAR(2048)',],
+        'size'           => ['create' => 'INTEGER',],
+        'width'          => ['create' => 'INTEGER',],
+        'height'         => ['create' => 'INTEGER',],
     ];
 
     public function __construct($oDB)

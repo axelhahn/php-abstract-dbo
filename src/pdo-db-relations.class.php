@@ -10,10 +10,12 @@ class pdo_db_relations extends pdo_db_base{
      */
     protected $_aProperties = [
         // 'label'       => ['create' => 'TEXT',     'label' => 'Label',                 'descr' => '', 'type' => 'text',           'edit' => true, 'required' => true],
-        'from_table'       => ['create' => 'TEXT',   ],
+        'from_table'       => ['create' => 'VARCHAR(32)',   ],
         'from_id'          => ['create' => 'INTEGER',],
-        'to_table'         => ['create' => 'TEXT',   ],
+        'from_column'      => ['create' => 'VARCHAR(32)',],
+        'to_table'         => ['create' => 'VARCHAR(32)',   ],
         'to_id'            => ['create' => 'INTEGER',],
+        'to_column'        => ['create' => 'VARCHAR(32)',],
         'uuid'             => ['create' => 'TEXT NOT NULL UNIQUE',],
         'remark'           => ['create' => 'TEXT',   ],
         # ^                            ^                      ^                                                 ^

@@ -616,13 +616,19 @@ class pdo_db_base
      * The tables here are sorted already (see _getRelationSortorder)
      * @param  string   $sFromTable  table name
      * @param  integer  $iFromId     table id
+     * @param  string   $sFromCol    column name
      * @param  string   $sToTable    second table
      * @param  integer  $iToId       second table id
+     * @param  string   $sToCol      column name
      * @return string
      */
-    protected function _getRelationUuid($sFromTable, $iFromId, $sToTable, $iToId)
+    protected function _getRelationUuid($sFromTable, $iFromId, $sFromCol, $sToTable, $iToId, $sToCol)
     {
-        return md5($sFromTable . ':' . $iFromId . '-->' . $sToTable . ':' . $iToId);
+        return md5(
+            $sFromTable . ':' . $iFromId . ':' . $sFromCol
+            .'-->' 
+            . $sToTable . ':' . $iToId . ':' . $sToCol
+        );
     }
 
     /**
@@ -634,32 +640,27 @@ class pdo_db_base
      * @param  integer  $iId2     second table id
      * @return array
      */
-    protected function _getRelationSortorder($sTable1, $iId1, $sTable2, $iId2)
+    protected function _getRelationSortorder($sTable1, $iId1, $sCol1, $sTable2, $iId2, $sCol2)
     {
-        $aReturn = $sTable1 < $sTable2
+        $aReturn = ($sTable1 < $sTable2 || ($sTable1 == $sTable2 && $iId1 < $iId2))
             ? [
                 'from_table'       => $sTable1,
                 'from_id'          => $iId1,
+                'from_column'      => $sCol1,
                 'to_table'         => $sTable2,
                 'to_id'            => $iId2,
+                'to_column'        => $sCol2,
             ]
-            : ($sTable1 != $sTable2 
-                ? [
-                    'from_table'       => $sTable2,
-                    'from_id'          => $iId2,
-                    'to_table'         => $sTable1,
-                    'to_id'            => $iId1,
-                ]
-                :[
-                    // relation to the same table: sort order is minimal id first
-                    'from_table'       => $sTable2,
-                    'from_id'          => min($iId1, $iId2),
-                    'to_table'         => $sTable1,
-                    'to_id'            => max($iId1, $iId2),
-                ]
-            )
+            : [
+                'from_table'       => $sTable2,
+                'from_id'          => $iId2,
+                'from_column'      => $sCol2,
+                'to_table'         => $sTable1,
+                'to_id'            => $iId1,
+                'to_column'        => $sCol1,
+            ]
             ;
-        $aReturn['uuid'] = $this->_getRelationUuid($aReturn['from_table'], $aReturn['from_id'], $aReturn['to_table'], $aReturn['to_id']);
+        $aReturn['uuid'] = $this->_getRelationUuid($aReturn['from_table'], $aReturn['from_id'], $aReturn['from_column'], $aReturn['to_table'], $aReturn['to_id'], $aReturn['to_column']);
         return $aReturn;
     }
 
@@ -683,9 +684,11 @@ class pdo_db_base
             ? [
                 'to_table' => $aRelitem['to_table'],
                 'to_id' => $aRelitem['to_id'],
+                'to_column' => $aRelitem['to_column'],
             ] : [
                 'to_table' => $aRelitem['from_table'],
                 'to_id' => $aRelitem['from_id'],
+                'to_column' => $aRelitem['from_column'],
             ];
         $sKey = $this->_getRelationKey($aTarget['to_table'], $aTarget['to_id']);
         $this->_aRelations[$sKey] = [
@@ -696,19 +699,20 @@ class pdo_db_base
     }
     /**
      * create a relation from the current item to an id of a target object
-     * @param  string  $sToTable  target object
-     * @param  string  $sToTable  target object
+     * @param  string  $sToTable      target object
+     * @param  string  $sToTable     target object
+     * @param  string  $sFromColumn  optional: source column
      * @return bool
      */
-    public function relCreate($sToTable, $iToId)
+    public function relCreate($sToTable, $iToId, $sFromColumn=NULL)
     {
-        $this->_wd(__METHOD__ . "($sToTable, $iToId)");
+        $this->_wd(__METHOD__ . "($sToTable, $iToId, $sFromColumn)");
         if (!$this->id()) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
+            $this->_log('error', __METHOD__ . "($sToTable, $iToId, $sFromColumn)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
             return false;
         }
         if (!isset($this->_aRelations)) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The relation is disabled.");
+            $this->_log('error', __METHOD__ . "($sToTable, $iToId, $sFromColumn)", "{'.$this->_table.'} The relation is disabled.");
             return false;
         }
 
@@ -726,7 +730,7 @@ class pdo_db_base
         }
 
         // helper function:
-        $aTmp = $this->_getRelationSortorder($this->_table, $this->id(), $sToTable, $iToId);
+        $aTmp = $this->_getRelationSortorder($this->_table, $this->id(), $sFromColumn, $sToTable, $iToId, NULL);
         $sKey = $this->_getRelationKey($sToTable, $iToId);
         if (isset($this->_aRelations[$sKey])) {
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The relation already exists. It has the key [$sKey].');
@@ -767,6 +771,8 @@ class pdo_db_base
                 (`to_table`="' . $this->_table . '" AND `to_id`="' . $this->id() . '")
                 AND `deleted`=0',
             'order' => [
+                'from_table ASC',
+                'from_id ASC',
                 'to_table ASC',
                 'to_id ASC'
             ],
@@ -774,19 +780,28 @@ class pdo_db_base
         // $this->_aQueries[]=$oRelation->lastquery();
         if (is_array($aRelations) && count($aRelations)) {
             foreach ($aRelations as $aEntry) {
-                $aTmp = $this->_getRelationSortorder($aEntry['from_table'], $aEntry['from_id'], $aEntry['to_table'], $aEntry['to_id']);
+                $aTmp = $this->_getRelationSortorder($aEntry['from_table'], $aEntry['from_id'],$aEntry['from_column'], $aEntry['to_table'], $aEntry['to_id'],$aEntry['to_column']);
 
                 $sTableKey = $this->_table == $aEntry['from_table']
                     ? 'to'
                     : 'from';
+                $sTableSelfKey = $sTableKey == 'from'
+                    ? 'to'
+                    : 'from';
                 $sRelKey = $this->_getRelationKey($aTmp[$sTableKey . '_table'], $aTmp[$sTableKey . '_id']);
                 $this->_aRelations[$sRelKey] = [
+                    'column' => $aEntry[$sTableSelfKey . '_column'],
                     'table' => $aEntry[$sTableKey . '_table'],
                     'id' => $aEntry[$sTableKey . '_id'],
                     '_relid' => $aEntry['id']
                 ];
+
+                // map into the item:
+                $sItemkey=$this->_aRelations[$sRelKey]['column'] ? $this->_aRelations[$sRelKey]['column'] : 'rel_'.$aEntry[$sTableKey . '_table'];
+                $this->_aItem[$sItemkey][] = $aEntry[$sTableKey . '_id'];
             }
         }
+        // echo '<pre>'; print_r($this->_aItem); die();
         return true;
     }
 
@@ -984,27 +999,31 @@ class pdo_db_base
         $aReturn = ['debug'=>[]];
         if (isset($this->_aProperties[$sAttr]['form'])) {
             $aReturn = $this->_aProperties[$sAttr]['form'];
-            $aReturn['debug']['_origin'] = 'fixed';
+            $aReturn['debug']['_origin'] = 'fixed config value';
         } else {
-            $aReturn['debug']['_origin'] = 'guess';
-            preg_match('/[a-zA-Z\(\)0-9]*/', $this->_aProperties[$sAttr]['create'], $aMatches);
-            $sTabletype = strtolower($aMatches[0]);
-            preg_match('/([a-zA-Z]*).*\(([0-9]*)/', $sTabletype, $aMatches2);
+            $aReturn['debug']['_origin'] = 'no config ... I need to guess';
 
-            // for debugging
-            $aReturn['debug']['_dbtable'] = $sTabletype;
-            $aReturn['debug']['_dbmatch'] = $aMatches2;
+            $sCreate=$this->_aProperties[$sAttr]['create'];
+            // everything before an optional "(" 
+            $sBasetype=strtolower(preg_replace('/\(.*$/', '', $sCreate));
+            $iSize=(int)strtolower(preg_replace('/.*\((.*)\)$/', '$1', $sCreate));
 
-            $sBasetype = isset($aMatches2[1]) ? $aMatches2[1] : false;
-            $iSize = isset($aMatches2[2]) ? $aMatches2[2] : false;
+            $aReturn['debug']['_dbtable_create'] = $sCreate;
+            $aReturn['debug']['_basetype'] = $sBasetype;
+            $aReturn['debug']['_size'] = $iSize;
 
             switch ($sBasetype) {
+                case 'int':
+                case 'integer':
+                    $aReturn['tag'] = 'input';
+                    $aReturn['type'] = 'integer';
+                    break;;
                 case 'text':
                     $aReturn['tag'] = 'textarea';
                     $aReturn['rows'] = 5;
                     break;;
                 case 'varchar':
-                    if (isset($iSize)) {
+                    if ($iSize) {
                         if ($iSize > 1024) {
                             $aReturn['tag'] = 'textarea';
                             $aReturn['maxlength'] = $iSize;
