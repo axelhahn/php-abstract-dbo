@@ -24,6 +24,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
+ * 2023-04-15  0.2  ah  ...
  * ======================================================================
  */
 
@@ -128,7 +129,8 @@ class pdo_db_base
             $this->_wd(__METHOD__ . ' Need to create table.');
             if(!$this->_createDbTable()){
                 $this->_wd(__METHOD__ . ' Error creating table.');
-                echo '<pre>';print_r($this->_pdo->queries());
+                echo '<pre>';
+                print_r($this->_pdo->queries());
                 die();
                 return false;
             };
@@ -193,20 +195,27 @@ class pdo_db_base
     {
         // Try a select statement against the table
         // Run it in try-catch in case PDO is in ERRMODE_EXCEPTION.
+        
+        // Output debug information
         $this->_wd(__METHOD__);
+        
+        // SQL statements for different database types
         $aSql = [
             'sqlite' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '$table';",
             'mysql' => "SHOW TABLES LIKE '$table';"
         ];
 
+        // Get the database type
         $type = $this->_pdo->driver();
 
+        // If the database type is not supported, throw an exception
         if (!isset($aSql[$type])) {
-            die("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
+            throw new Exception("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
         }
 
+        // Execute the SQL statement and return the result
         $result = $this->makeQuery($aSql[$type]);
-        return $result ? !!count($result) : false;
+        return $result ? (bool)count($result) : false;
     }
 
     /**
@@ -353,51 +362,60 @@ class pdo_db_base
         foreach ($result as $aColumndef) {
             $aCols[$aColumndef[$aDbSpecifics[$type]['key4column']]] = [
                 'column'          => $aColumndef[$aDbSpecifics[$type]['key4column']],
-                'type'            => false,
-                'type_translated' => strtolower(str_ireplace(array_keys($aDB), array_values($aDB), $aColumndef[$aDbSpecifics[$type]['key4type']])),
                 'type_current'    => strtolower($aColumndef[$aDbSpecifics[$type]['key4type']]),
+                'type'            => false,
+                'type_translated' => false,
             ];
         }
 
         $aAllTables = array_merge($this->_aDefaultColumns, $this->_aProperties);
         foreach ($aAllTables as $sColumn => $aData) {
+            $_sCreateType=preg_replace('/([a-z\(0-0\)]*)\ .*$/', '$1', $aData['create']);
             $aCols[$sColumn]['type']=$aData['create'];
-            if (!isset($aCols[$sColumn])) {
+            $aCols[$sColumn]['type_translated']=strtolower(str_ireplace(array_keys($aDB), array_values($aDB), $_sCreateType));
+            if (!isset($aCols[$sColumn]['type_current'])) {
                 $iErrors++;
                 $aReturn['tables'][$sColumn] = [
                     'error' => 1,
-                ];
-                $aMessages[] = 'Database column [' . $sColumn . '] is missing.';
-            } elseif ($aCols[$sColumn]['type_translated'] !== $aCols[$sColumn]['type_current']) {
-                $iErrors++;
-                $aReturn['tables'][$sColumn] = [
-                    'error' => 1,
-                    'is' => $aData['create'],
+                    'is' => '-- missing --',
                     'must' => $aCols[$sColumn]['type'],
                 ];
-                $aMessages[] = 'Type of database column [' . $sColumn . '] is wrong. Alter table ['.$aData['create'].'] to [' . $aCols[$sColumn]['type'] . ']';
+                $aMessages[] = 'Database column <strong>' . $sColumn . '</strong>: Column <ins>' . $sColumn . '</ins> needs to be created as <em>'.$aData['create'].'</em>.';
+            } elseif (!isset($aCols[$sColumn]['type_translated']) || $aCols[$sColumn]['type_translated'] !== $aCols[$sColumn]['type_current']) {
+                $iErrors++;
+                $aReturn['tables'][$sColumn] = [
+                    'error' => 1,
+                    'is' => $aCols[$sColumn]['type_current'],
+                    'must' => $aCols[$sColumn]['type'],
+                ];
+                $aMessages[] = 'Database column <strong>' . $sColumn . '</strong>: It\'s type is not up to date. Alter column from <del>'.$aCols[$sColumn]['type_current'].'</del> to <ins>' . $aCols[$sColumn]['type'] . '</ins>';
             } else {
                 $iOK++;
                 $aReturn['tables'][$sColumn] = [
                     'ok' => 1,
-                    'is' => $aData['create'],
+                    'is' => $aCols[$sColumn]['type_current'],
                 ];
             };
         }
-        // echo '<pre style="margin-left: 20em;">'; print_r($aCols); echo '</pre>';
 
         foreach ($aCols as $sColumn => $aData) {
             if (!isset($aAllTables[$sColumn])) {
                 $aReturn['tables'][$sColumn] = [
                     'error' => 1,
                 ];
-                $aMessages[] = 'Database column [' . $sColumn . '] exists in database but is no property of the object. Verify if you need to execute ALTER TABLE or delete it.';
+                $aMessages[] = 'Database column <strong>' . $sColumn . '</strong>: exists in database but is no property of the object. Verify if you need to execute ALTER TABLE or delete it.';
             }
         }
 
         $aReturn['_result']['errors'] = $iErrors;
         $aReturn['_result']['ok'] = $iOK;
         $aReturn['_result']['messages'] = $aMessages;
+
+        /*
+        echo '<pre style="margin-left: 20em;">'; print_r($result); echo '</pre>';
+        echo '<pre style="margin-left: 20em;">'; print_r($aCols); echo '</pre>';
+        echo '<pre style="margin-left: 20em;">'; print_r($aReturn); echo '</pre>';
+        */
 
         return $aReturn;
 
@@ -429,7 +447,7 @@ class pdo_db_base
 
     /**
      * generate a hash for a new empty item
-     * @return hash
+     * @return bool
      */
     public function new()
     {
@@ -588,7 +606,7 @@ class pdo_db_base
 
     /**
      * save item
-     * @return array
+     * @return bool
      */
     public function save()
     {
@@ -820,7 +838,7 @@ class pdo_db_base
     /**
      * delete a single relation from current item
      * @param  string  $sRelKey  key of the relation; a string like 'table:id'
-     * @return array
+     * @return bool
      */
     public function relDelete($sRelKey)
     {
@@ -856,14 +874,14 @@ class pdo_db_base
         foreach (array_keys($this->_aRelations) as $sRelKey) {
             if (!$this->relDelete($sRelKey)) {
                 if (isset($tmpItem)) {
-                    $this->_aItem = $this->_aItem;
+                    $this->_aItem = $tmpItem;
                     $this->_aRelations = $tmpRel;
                 }
                 return false;
             };
         }
         if (isset($tmpItem)) {
-            $this->_aItem = $this->_aItem;
+            $this->_aItem = $tmpItem;
             $this->_aRelations = $tmpRel;
         }
         return true;
@@ -983,11 +1001,14 @@ class pdo_db_base
      * - varchar -> input type text; maxsize is size of varchar
      * - varchar with more than 1024 byte -> textarea
      * 
-     * If attribute contains 
-     *   - "html" -> textarea with type "html"
+     * If attribute starts with 
+     *   - "date"     -> input with type date
+     *   - "datetime" -> input with type datetime-local
+     *   - "html"     -> textarea with type "html"
+     *   - "number"   -> textarea with type "number"
      * 
      * @param  string  $sAttr  name of the property
-     * @return array
+     * @return array|bool
      */
     public function getFormtype($sAttr)
     {
@@ -995,6 +1016,13 @@ class pdo_db_base
             $this->_log('error', __METHOD__ . '(' . $sAttr . ')', 'Attribute does not exist');
             return false;
         }
+
+        $aColumnMatcher=[
+            [ 'regex' =>'/^date/',     'tag' => 'input',    'type' => 'date'           ],
+            [ 'regex' =>'/^datetime/', 'tag' => 'input',    'type' => 'datetime-local' ],
+            [ 'regex' =>'/^html/',     'tag' => 'textarea', 'type' => 'html'           ],
+            [ 'regex' =>'/^number/',   'tag' => 'input',    'type' => 'number'         ],
+        ];
 
         $aReturn = ['debug'=>[]];
         if (isset($this->_aProperties[$sAttr]['form'])) {
@@ -1042,9 +1070,13 @@ class pdo_db_base
                     break;;
             }
 
-            if (preg_match('/html/', $sAttr)) {
-                $aReturn['tag'] = 'textarea';
-                $aReturn['type'] = 'html';
+            foreach($aColumnMatcher as $aMatchdata){
+                $aReturn['debug']['_origin'] = 'column matcher';
+                $aReturn['debug']['_match'] = $aMatchdata;
+                if (preg_match($aMatchdata['regex'], $sAttr)) {
+                    $aReturn['tag'] = $aMatchdata['tag'];
+                    $aReturn['type'] = $aMatchdata['type'];
+                }
             }
 
             // print_r($aMatches); die();
@@ -1064,7 +1096,7 @@ class pdo_db_base
      *                          - where   - array|string
      *                          - order   - array|string
      *                          - limit   - string
-     * @return array
+     * @return array|bool
      */
     public function search($aOptions = [])
     {
@@ -1136,7 +1168,7 @@ class pdo_db_base
      * Opposite function of get()
      * @param  string  $sKey2Set  key of your object to set
      * @param  mixed     $value     new value to set
-     * @return integer
+     * @return bool
      */
     public function set($sKey2Set, $value)
     {
@@ -1187,8 +1219,8 @@ class pdo_db_base
             }
         } else {
             throw new Exception(__METHOD__ . " - ERROR: The key [$sKey2Set] cannot be set for [" . $this->_table . "].");
-            return false;
         }
+        return false;
     }
 
     /**

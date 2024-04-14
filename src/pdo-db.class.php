@@ -10,6 +10,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
+ * 2023-04-15  0.2  ah  ...
  * ======================================================================
  */
 
@@ -103,10 +104,6 @@ class pdo_db
     // PRIVATE FUNCTIONS
     // ----------------------------------------------------------------------
 
-
-    // ----------------------------------------------------------------------
-    // SETTER
-    // ----------------------------------------------------------------------
     /**
      * write debug output if enabled by flag
      * @param  string  $s       string to show
@@ -141,6 +138,10 @@ class pdo_db
         }
         return true;
     }
+
+    // ----------------------------------------------------------------------
+    // SETTER
+    // ----------------------------------------------------------------------
 
     /**
      * create a PDO connection
@@ -191,6 +192,7 @@ class pdo_db
         if ($bNewValue) {
             $this->_wd(__METHOD__ . " - Debug is now ON.");
         }
+        return true;
     }
     /**
      * enable/ disable debug; show error message if they occur
@@ -237,7 +239,7 @@ class pdo_db
      * - time - {float} execution time in ms
      * - records - {integer} count of returned records
      * - error - {string} PDO error message
-     * @return array
+     * @return array|bool
      */
     public function lastquery()
     {
