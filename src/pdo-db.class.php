@@ -10,7 +10,6 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2023-04-15  0.2  ah  ...
  * ======================================================================
  */
 
@@ -81,17 +80,18 @@ class pdo_db
     public function __construct($aOptions=[])
     {
 
+        $sDbConfig = (isset($aOptions['cfgfile']) && is_file($aOptions['cfgfile']))
+            ? $aOptions['cfgfile']
+            : __DIR__ . '/pdo-db.config.php';
+
+        $aDefaults = file_exists($sDbConfig) ? include $sDbConfig : [];
+
         if (isset($aOptions['showdebug'])) {
             $this->setDebug($aOptions['showdebug']);
         }
         if (isset($aOptions['showerrors'])) {
             $this->showErrors($aOptions['showerrors']);
         }
-        $sDbConfig = (isset($aOptions['cfgfile']) && is_file($aOptions['cfgfile']))
-            ? $aOptions['cfgfile']
-            : __DIR__ . '/pdo-db.config.php';
-
-        $aDefaults = file_exists($sDbConfig) ? include $sDbConfig : [];
 
         if (isset($aOptions['db'])) {
             $aDefaults=$aOptions['db'];
@@ -234,11 +234,12 @@ class pdo_db
 
     /**
      * get the last query as array that can have these keys
-     * - sql - {string} executed sql query
-     * - data - {array} data array (when using prepare statement)
-     * - time - {float} execution time in ms
-     * - records - {integer} count of returned records
-     * - error - {string} PDO error message
+     *   - method  {string}  name of the method that triggered the query
+     *   - sql     {string}  executed sql query
+     *   - data    {array}   optional: data array (when using prepare statement)
+     *   - time    {float}   execution time in ms
+     *   - records {integer} count of returned records on SELECT or affected rows on INSERT, UPDATE or DELETE
+     *   - error   {string}  optional:PDO error message
      * @return array|bool
      */
     public function lastquery()
@@ -259,13 +260,61 @@ class pdo_db
 
 
     /**
-     * get an array with all queries
+     * get an array with all queries. Each entry can have these keys:
+     *   - method  {string}  name of the method that triggered the query
+     *   - sql     {string}  executed sql query
+     *   - data    {array}   optional: data array (when using prepare statement)
+     *   - time    {float}   execution time in ms
+     *   - records {integer} count of returned records on SELECT or affected rows on INSERT, UPDATE or DELETE
+     *   - error   {string}  optional:PDO error message
      * @return array
      */
     public function queries()
     {
         return $this->_aQueries;
     }
+
+    /**
+     * WIP :: EXPERIMENTAL
+     * dump a database to an array
+     */
+    public function dump(){
+        $aSql = [
+            'sqlite' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';",
+            'mysql' => "SHOW TABLES;"
+        ];
+        $aResult=[];
+        $this->_wd(__METHOD__);
+        if (!$this->db){
+            $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. Database was not set yet.');
+            return false;
+        }
+        $_sDriver=$this->driver();
+        if (!isset($aSql[$_sDriver])){
+            $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. Unknown database driver "'.$_sDriver.'".');
+            return false;
+        }
+
+        // ----- get all tables
+
+        $odbtables = $this->db->query($aSql[$this->driver()]);
+
+        // TODO: check if PDO::FETCH_COLUMN works with mysql too
+        $_aTableList = $odbtables->fetchAll(PDO::FETCH_COLUMN);
+        if(!$_aTableList || !count($_aTableList)){
+            $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
+            return false;
+        }
+        // ----- read each table
+        foreach($_aTableList as $sTablename){
+            $this->_wd(__METHOD__.' Reading table '.$sTablename);
+            $odbtables = $this->db->query('SELECT * FROM `' . $sTablename . '` ');
+            $aResult[$sTablename]=$odbtables->fetchAll(PDO::FETCH_ASSOC);
+        }
+        // print_r($aResult);
+        return $aResult;
+    }
+
 }
 
 // ----------------------------------------------------------------------

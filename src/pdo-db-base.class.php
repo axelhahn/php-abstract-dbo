@@ -11,12 +11,9 @@
  * TODO:
  * 
  * - validate values in method set() - WIP
- * - handle relations - WIP
- *     - update delete() and flush()
  * - better handling of errors - see  $this->_aLastError (set in 
  *   makeQuery()) vs $this->_sLastError
  * - More useful debugging _wd()
- * - detect change in table definitions
  * - find a sexy name
  * 
  * ----------------------------------------------------------------------
@@ -24,7 +21,6 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2023-04-15  0.2  ah  ...
  * ======================================================================
  */
 
@@ -129,10 +125,7 @@ class pdo_db_base
             $this->_wd(__METHOD__ . ' Need to create table.');
             if(!$this->_createDbTable()){
                 $this->_wd(__METHOD__ . ' Error creating table.');
-                echo '<pre>';
-                print_r($this->_pdo->queries());
-                die();
-                return false;
+                die('ERROR: Unable to create table for [' . $sObjectname . '].');
             };
         }
 
@@ -245,7 +238,8 @@ class pdo_db_base
             return false;
         }
         $_aData = $result->fetchAll(PDO::FETCH_ASSOC);
-        $aLastQuery['records'] = count($_aData);
+        $aLastQuery['records'] = count($_aData) ? count($_aData) : $result->rowCount();
+        
         $this->_pdo->_aQueries[] = $aLastQuery;
         return $_aData;
     }
@@ -335,8 +329,8 @@ class pdo_db_base
 
         $this->_wd(__METHOD__);
         $aDbSpecifics = [
-            'sqlite' => [ 'sql' => 'PRAGMA table_info(' . $this->_table . ')', 'key4column'=>'name',  'key4type' => 'type', ],
-            'mysql' =>  [ 'sql' => 'describe ' . $this->_table . ';',          'key4column'=>'Field', 'key4type' => 'Type', ],
+            'sqlite' => [ 'sql' => 'PRAGMA table_info(`' . $this->_table . '`)', 'key4column'=>'name',  'key4type' => 'type', ],
+            'mysql' =>  [ 'sql' => 'DESCRIBE `' . $this->_table . '`;',          'key4column'=>'Field', 'key4type' => 'Type', ],
         ];
 
 
@@ -491,15 +485,18 @@ class pdo_db_base
 
     /**
      * read an entry by given id
-     * @param  array  $aItem           new announcement data
-     * @param  bool   $bReadRelations  read relation while loading object? default: false
-     * @return mixed bool|integer false on failure or new id on success
+     * @param  int    $iId             id to read
+     * @param  bool   $bReadRelations  read relation too? default: false
+     * @return mixed bool  success
      */
     public function read($iId, $bReadRelations = false)
     {
         $this->new();
-        $sSql = 'SELECT * from `' . $this->_table . '` WHERE `id`=' . (int)$iId . ' and deleted=0';
-        $result = $this->makeQuery($sSql);
+        $sSql = 'SELECT * FROM `' . $this->_table . '` WHERE `id`=:id AND deleted=0';
+        $aData=[
+            'id'=>(int)$iId,
+        ];
+        $result = $this->makeQuery($sSql, $aData);
         if (isset($result[0])) {
             $this->_aItem = $result[0];
 
@@ -553,12 +550,15 @@ class pdo_db_base
      */
     public function delete($iId = false)
     {
-        $iId = (int)$iId ? (int)$iId : (int)$this->id();
+        $iId = (int)$iId ? (int)$iId : $this->id();
         if ($iId) {
             if ($this->relDeleteAll($iId)) {
 
-                $sSql = 'DELETE from `' . $this->_table . '` WHERE `id`=' . (int)$iId;
-                $result = $this->makeQuery($sSql);
+                $sSql = 'DELETE from `' . $this->_table . '` WHERE `id`=:id';
+                $aData=[
+                    'id'=>$iId,
+                ];
+                $result = $this->makeQuery($sSql, $aData);
                 if (is_array($result)) {
                     // TODO: delete relations
                     // - delete relations from_table+from_id
@@ -717,8 +717,8 @@ class pdo_db_base
     }
     /**
      * create a relation from the current item to an id of a target object
-     * @param  string  $sToTable      target object
      * @param  string  $sToTable     target object
+     * @param  string  $sToId        target object
      * @param  string  $sFromColumn  optional: source column
      * @return bool
      */
@@ -791,8 +791,10 @@ class pdo_db_base
             'order' => [
                 'from_table ASC',
                 'from_id ASC',
+                'from_column ASC',
                 'to_table ASC',
-                'to_id ASC'
+                'to_id ASC',
+                'to_column ASC',
             ],
         ]);
         // $this->_aQueries[]=$oRelation->lastquery();
@@ -907,7 +909,7 @@ class pdo_db_base
      */
     public function count()
     {
-        $aTmp = $this->makeQuery('select count(id) as count from `' . $this->_table . '` WHERE deleted=0');
+        $aTmp = $this->makeQuery('SELECT count(id) AS count FROM `' . $this->_table . '` WHERE deleted=0');
         return isset($aTmp[0]['count']) ? $aTmp[0]['count'] : 0;
     }
     /**
@@ -1227,7 +1229,8 @@ class pdo_db_base
      * set new values for an item.
      * The general fields (id, created, updated, delete) cannot be set.
      * Opposite function if getItem()
-     * @return integer
+     * @param  array  $aNewValues  new values to set; a subset of this->_aItem
+     * @return bool
      */
     public function setItem($aNewValues)
     {
