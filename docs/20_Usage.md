@@ -121,6 +121,7 @@ $o=new axelhahn\objexample($oDB);
 | ``$oDB->lastquery()``           | {array}   | get an array of last query
 | ``$oDB->logs()``                | {array}   | get an array of all log messages (errors and others)
 | ``$oDB->queries()``             | {array}   | get an array of all queries
+| ``$oDB->dump()``                | {array}   | get an array of all tables and their rows (import will follow soon)
 
 #### Item object
 
