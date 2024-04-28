@@ -191,8 +191,14 @@ class pdo_db
                 $sDsn,
                 (isset($aOptions['user'])     ? $aOptions['user']     : NULL),
                 (isset($aOptions['password']) ? $aOptions['password'] : NULL),
-                (isset($aOptions['options'])  ? $aOptions['options'] : NULL)
+                (isset($aOptions['options'])  ? $aOptions['options']  : NULL)
             );
+            $type = $this->driver();
+            // If the database type is not supported, throw an exception
+            if (!isset($this->_aSql[$type])) {
+                throw new Exception("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
+            }
+    
         } catch (PDOException $e) {
             $this->_log('error', '[DB]', __METHOD__, 'Failed to initialize the database connection. PDO ERROR: ' . $e->getMessage());
             return false;
@@ -309,9 +315,6 @@ class pdo_db
      */
     function tableExists($table)
     {
-        // Try a select statement against the table
-        // Run it in try-catch in case PDO is in ERRMODE_EXCEPTION.
-        
         // Output debug information
         $this->_wd(__METHOD__);
         
@@ -319,23 +322,34 @@ class pdo_db
         $type = $this->driver();
 
         // If the database type is not supported, throw an exception
-        if (!isset($this->_aSql[$type])) {
-            throw new Exception("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
+        if (!isset($this->_aSql[$type]['tableexists'])) {
+            throw new Exception("Ooops: " . __CLASS__ . " has no SQL for [tableexists] for type [" . $type . "] yet :-/");
         }
 
-        // Execute the SQL statement and return the result
-        // $result = $this->makeQuery($aSql[$type]);
-        $sQuery=sprintf($this->_aSql[$type]['tableexists'], $table, 1);
-        $result = $this->makeQuery($sQuery);
-
+        // Check table
+        $result = $this->makeQuery(sprintf($this->_aSql[$type]['tableexists'], $table, 1));
         return $result ? (bool)count($result) : false;
     }
 
+    public function showTables(){
+        // $_aTableList = $this->makeQuery($this->_aSql[$_sDriver]['gettables']);
+        $type = $this->driver();
+        // If the database type is not supported, throw an exception
+        if (!isset($this->_aSql[$type]['gettables'])) {
+            throw new Exception("Ooops: " . __CLASS__ . " has no SQL for [gettables] for type [" . $type . "] yet :-/");
+        }
 
+        // TODO: use makeQuery() to see it in log
+        // difficulty: query result is incompatible FETCH_ASSOC
+        $odbtables = $this->db->query($this->_aSql[$type]['gettables']);
+        $_aTableList = $odbtables->fetchAll(PDO::FETCH_COLUMN);
+        return $_aTableList;
+    }
     /**
-     * execute a sql statement
+     * execute a sql statement and put metadata / error messages into the log
      * @param  string  $sSql   sql statement
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
+     * @param  string  $_table optional: table name to add to log
      * @return array|boolean
      */
     public function makeQuery($sSql, $aData = [], $_table='')
