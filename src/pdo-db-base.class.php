@@ -121,7 +121,7 @@ class pdo_db_base
         $this->_table = $this->getTablename($sObjectname);
 
         $this->_pdo = $oDB;
-        if (!$this->_tableExists($this->_table)) {
+        if (!$this->_pdo->tableExists($this->_table)) {
             $this->_wd(__METHOD__ . ' Need to create table.');
             if(!$this->_createDbTable()){
                 $this->_wd(__METHOD__ . ' Error creating table.');
@@ -178,41 +178,11 @@ class pdo_db_base
         return date("Y-m-d H:i:s");
     }
 
-    /**
-     * Check if a table exists in the current database.
-     *
-     * @param string $table Table to search for.
-     * @return bool TRUE if table exists, FALSE if no table found.
-     */
-    function _tableExists($table)
-    {
-        // Try a select statement against the table
-        // Run it in try-catch in case PDO is in ERRMODE_EXCEPTION.
-        
-        // Output debug information
-        $this->_wd(__METHOD__);
-        
-        // SQL statements for different database types
-        $aSql = [
-            'sqlite' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '$table';",
-            'mysql' => "SHOW TABLES LIKE '$table';"
-        ];
-
-        // Get the database type
-        $type = $this->_pdo->driver();
-
-        // If the database type is not supported, throw an exception
-        if (!isset($aSql[$type])) {
-            throw new Exception("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
-        }
-
-        // Execute the SQL statement and return the result
-        $result = $this->makeQuery($aSql[$type]);
-        return $result ? (bool)count($result) : false;
-    }
 
     /**
      * execute a sql statement
+     * a wrapper for $this->_pdo->makeQuery() that adds the current table
+     * 
      * @param  string  $sSql   sql statement
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
      * @return array|boolean
@@ -220,28 +190,7 @@ class pdo_db_base
     public function makeQuery($sSql, $aData = [])
     {
         $this->_wd(__METHOD__ . " ($sSql, " . (count($aData) ? "DATA[" . count($aData) . "]" : "NODATA") . ")");
-        $aLastQuery = ['method' => __METHOD__, 'sql' => $sSql];
-        $_timestart = microtime(true);
-        try {
-            if (is_array($aData) && count($aData)) {
-                $aLastQuery['data'] = $aData;
-                $result = $this->_pdo->db->prepare($sSql);
-                $result->execute($aData);
-            } else {
-                $result = $this->_pdo->db->query($sSql);
-            }
-            $aLastQuery['time'] = number_format((float)(microtime(true) - $_timestart) / 1000, 3);
-        } catch (PDOException $e) {
-            $aLastQuery['error'] = 'PDO ERROR: ' . $e->getMessage();
-            $this->_log('error', __METHOD__, "{'.$this->_table.'} Query [$sSql] failed: " . $aLastQuery['error'] . ' See $DB->queries().');
-            $this->_pdo->_aQueries[] = $aLastQuery;
-            return false;
-        }
-        $_aData = $result->fetchAll(PDO::FETCH_ASSOC);
-        $aLastQuery['records'] = count($_aData) ? count($_aData) : $result->rowCount();
-        
-        $this->_pdo->_aQueries[] = $aLastQuery;
-        return $_aData;
+        return $this->_pdo->makeQuery($sSql, $aData, $this->_table);
     }
 
 
@@ -290,7 +239,7 @@ class pdo_db_base
      */
     private function _createDbTable()
     {
-        if ($this->_tableExists($this->_table)) {
+        if ($this->_pdo->tableExists($this->_table)) {
             $this->_log(PB_LOGLEVEL_INFO, __METHOD__ . '()', '{' . $this->_table . '} Table already exists');
             return true;
         }
@@ -312,7 +261,7 @@ class pdo_db_base
         }
         $sSql = "CREATE TABLE " . $this->_table . " ($sSql)\n;";
         $this->makeQuery($sSql);
-        if (!$this->_tableExists($this->_table)) {
+        if (!$this->_pdo->tableExists($this->_table)) {
             $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to create {' . $this->_table . '}.');
             return false;
         }
@@ -738,7 +687,7 @@ class pdo_db_base
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target table was not set.");
             return false;
         }
-        if (!$this->_tableExists($sToTable)) {
+        if (!$this->_pdo->tableExists($sToTable)) {
             $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "The target table {'.$sToTable.'} does not exist.");
             return false;
         }

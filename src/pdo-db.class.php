@@ -16,7 +16,7 @@
 
 namespace axelhahn;
 
-use PDO, PDOException;
+use Exception, PDO, PDOException;
 
 /**
  * class for a single PDO connection
@@ -32,9 +32,10 @@ class pdo_db
      */
     public $db;
 
+
     /**
      * collected array of log messages
-     * @array
+     * var @array
      */
     protected $_aLogmessages = [];
 
@@ -57,6 +58,26 @@ class pdo_db
      * @var array
      */
     public $_aQueries = [];
+
+    // ----------------------------------------------------------------------
+
+    /**
+     * sql statements for different database types
+     * @var array
+     */
+    protected $_aSql = [
+        'sqlite' => [
+            "gettables"=>'SELECT name FROM sqlite_schema WHERE type = "table" AND name NOT LIKE "sqlite_%";',
+            "getcreate"=>'SELECT sql FROM sqlite_master WHERE name = "%s" ',
+            'tableexists' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '%s';",
+
+        ],
+        'mysql' => [
+            "gettables"=>'SHOW TABLES;',
+            "getcreate"=>'SHOW CREATE TABLE %s"',
+            'tableexists' => "SHOW TABLES LIKE '%s';"
+        ]
+    ];
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
@@ -212,7 +233,7 @@ class pdo_db
     // ----------------------------------------------------------------------
 
     /**
-     * get name of the current driver, eg. "mysql"
+     * get name of the current driver, eg. "mysql" or "sqlite"
      * @return string
      */
     public function driver()
@@ -274,32 +295,107 @@ class pdo_db
         return $this->_aQueries;
     }
 
+
+    // ----------------------------------------------------------------------
+    // db functions
+    // ----------------------------------------------------------------------
+
+
+    /**
+     * Check if a table exists in the current database.
+     *
+     * @param string $table Table to search for.
+     * @return bool TRUE if table exists, FALSE if no table found.
+     */
+    function tableExists($table)
+    {
+        // Try a select statement against the table
+        // Run it in try-catch in case PDO is in ERRMODE_EXCEPTION.
+        
+        // Output debug information
+        $this->_wd(__METHOD__);
+        
+        // Get the database type
+        $type = $this->driver();
+
+        // If the database type is not supported, throw an exception
+        if (!isset($this->_aSql[$type])) {
+            throw new Exception("Ooops: " . __CLASS__ . " does not support db type [" . $type . "] yet :-/");
+        }
+
+        // Execute the SQL statement and return the result
+        // $result = $this->makeQuery($aSql[$type]);
+        $sQuery=sprintf($this->_aSql[$type]['tableexists'], $table, 1);
+        $result = $this->makeQuery($sQuery);
+
+        return $result ? (bool)count($result) : false;
+    }
+
+
+    /**
+     * execute a sql statement
+     * @param  string  $sSql   sql statement
+     * @param  array   $aData  array with data items; if present prepare statement will be executed 
+     * @return array|boolean
+     */
+    public function makeQuery($sSql, $aData = [], $_table='')
+    {
+        $this->_wd(__METHOD__ . " ($sSql, " . (count($aData) ? "DATA[" . count($aData) . "]" : "NODATA") . ")");
+        $aLastQuery = ['method' => __METHOD__, 'sql' => $sSql];
+        $_timestart = microtime(true);
+        try {
+            if (is_array($aData) && count($aData)) {
+                $aLastQuery['data'] = $aData;
+                $result = $this->db->prepare($sSql);
+                $result->execute($aData);
+            } else {
+                $result = $this->db->query($sSql);
+            }
+            $aLastQuery['time'] = number_format((float)(microtime(true) - $_timestart) / 1000, 3);
+        } catch (PDOException $e) {
+            $aLastQuery['error'] = 'PDO ERROR: ' . $e->getMessage();
+            $this->_log('error', $_table, __METHOD__, "{'.$_table.'} Query [$sSql] failed: " . $aLastQuery['error'] . ' See $DB->queries().');
+            $this->_aQueries[] = $aLastQuery;
+            return false;
+        }
+        $_aData = $result->fetchAll(PDO::FETCH_ASSOC);
+        $aLastQuery['records'] = count($_aData) ? count($_aData) : $result->rowCount();
+        
+        $this->_aQueries[] = $aLastQuery;
+        return $_aData;
+    }
+
     /**
      * WIP :: EXPERIMENTAL
-     * dump a database to an array
+     * Dump a database to an array.
+     * Optional it can write a json file to disk
+     * 
+     * @param string $sOutfile  optional: output file name
+     * @return mixed  array of data on success or false on error
      */
-    public function dump(){
-        $aSql = [
-            'sqlite' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';",
-            'mysql' => "SHOW TABLES;"
-        ];
+    public function dump($sOutfile=false){
+
         $aResult=[];
+        $aResult['timestamp']=date("Y-m-d H:i:s");
+        $aResult['driver']=$this->driver();
+        $aResult['tables']=[];
+
         $this->_wd(__METHOD__);
         if (!$this->db){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. Database was not set yet.');
             return false;
         }
         $_sDriver=$this->driver();
-        if (!isset($aSql[$_sDriver])){
+        if (!isset($this->_aSql[$_sDriver])){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. Unknown database driver "'.$_sDriver.'".');
             return false;
         }
 
         // ----- get all tables
 
-        $odbtables = $this->db->query($aSql[$this->driver()]);
+        // $_aTableList = $this->makeQuery($this->_aSql[$_sDriver]['gettables']);
+        $odbtables = $this->db->query($this->_aSql[$_sDriver]['gettables']);
 
-        // TODO: check if PDO::FETCH_COLUMN works with mysql too
         $_aTableList = $odbtables->fetchAll(PDO::FETCH_COLUMN);
         if(!$_aTableList || !count($_aTableList)){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
@@ -308,13 +404,64 @@ class pdo_db
         // ----- read each table
         foreach($_aTableList as $sTablename){
             $this->_wd(__METHOD__.' Reading table '.$sTablename);
+            $aResult[$sTablename]=[];
+
+            $sSqlCreate=sprintf($this->_aSql[$this->driver()]['getcreate'], $sTablename, 1);
+            $oCreate = $this->db->query($sSqlCreate);
+            // $oCreate = $this->db->query('SELECT sql FROM sqlite_master');
+            $aResult['tables'][$sTablename]['create']=$oCreate->fetchAll(PDO::FETCH_COLUMN)[0];
+
             $odbtables = $this->db->query('SELECT * FROM `' . $sTablename . '` ');
-            $aResult[$sTablename]=$odbtables->fetchAll(PDO::FETCH_ASSOC);
+            $aResult['tables'][$sTablename]['data']=$odbtables->fetchAll(PDO::FETCH_ASSOC);
         }
-        // print_r($aResult);
+        //print_r($aResult);
+
+        // ----- optional: write to file
+        if($sOutfile){
+            $this->_wd(__METHOD__. ' Writing to '.$sOutfile);
+            file_put_contents($sOutfile, json_encode($aResult, JSON_PRETTY_PRINT));
+        }
         return $aResult;
     }
 
+    /**
+     * WIP :: EXPERIMENTAL
+     * Import data from a json file; reverse function to dump()
+     * @param  string   $sFile  json file
+     * @return boolean
+     */
+    public function import($sFile){
+        $this->_wd(__METHOD__);
+        if (!$this->db){
+            $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
+            return false;
+        }
+        $aResult = json_decode(file_get_contents($sFile), true);
+        if(!$aResult){
+            $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. No data in file.');
+            return false;
+        }
+
+        // ----- read each table
+        foreach($aResult['tables'] as $sTablename => $aTable){
+            $this->_wd(__METHOD__.' Importing table '.$sTablename);
+
+            // (1) if table exists then skip creation
+            if ($this->tableExists($sTablename)) {
+                $this->_log('info', '[DB]', __METHOD__, 'Table ['.$sTablename.'] already exists. Skipping.');
+            } else {
+                $sSql = $aTable['create'];
+                $this->db->query($sSql);    
+            }
+
+            // (2) insert data
+            foreach($aTable['data'] as $aRow){
+                $sSql = 'INSERT INTO `' . $sTablename . '` ('.implode(',',array_keys($aRow)).') VALUES ('.implode(',',array_values($aRow)).');';
+                $this->db->query($sSql);
+            }
+        }
+        return true;
+    }
 }
 
 // ----------------------------------------------------------------------
