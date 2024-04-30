@@ -183,7 +183,7 @@ get a single value
 $o->get('label');
 ```
 
-### delete an item
+### Delete an item
 
 To delete a loaded item use
 

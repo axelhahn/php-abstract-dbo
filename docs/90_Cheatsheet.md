@@ -39,7 +39,7 @@
 | ``$o->delete(ID)``              | {bool}    | delete item with given ID in the database
 | RELATIONS
 | ``$o->relCreate(TABLE, ID)``    | {bool}    | create a relation between current item and an id to another table
-| ``$o->relRead()``               | {array}   | get relations of the current item
+| ``$o->relRead(FILTER)``         | {array}   | get relations of the current item; FILTER is an optional array with keys "table" and optional "column"
 | ``$o->relDelete(RELID)``        | {bool}    | delete a single relation of the current item 
 | ``$o->relDeleteAll()``          | {bool}    | delete all relation of the current item 
 | ``$o->relDeleteAll(ID)``        | {bool}    | delete all relation of given item 
@@ -47,8 +47,10 @@
 | ``$o->flush()``                 | {bool}    | DANGEROUS: delete all items of the current object type by dropping its table
 | ``$o->save()``                  | {bool}    | selects automatically create() or update() to store an item
 | INFOS
-| ``$o->getAttributes()``         | {array}   | get list of attributes
 | ``$o->count()``                 | {integer} | get count of existing items for the current item type
+| ``$o->getAttributes()``         | {array}   | get list of attributes
+| ``$o->getTable()``              | {string}  | get name of database table for current object
+| ``$o->hasChange()``             | {bool}    | check if the current item was changed after applying set() or setItem()
 | ``$o->id()``                    | {integer} | get id of current item
 | ``$o->search(ARRAY)``           | {array}   | search in objects
 | ``$o->verifyColumns()``         | {array}   | verify object definitions with created databse columns
