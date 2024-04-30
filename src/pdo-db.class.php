@@ -380,10 +380,10 @@ class pdo_db
     }
 
     /**
-     * WIP :: EXPERIMENTAL
      * Dump a database to an array.
      * Optional it can write a json file to disk
      * 
+     * @see import()
      * @param string $sOutfile  optional: output file name
      * @return mixed  array of data on success or false on error
      */
@@ -407,10 +407,7 @@ class pdo_db
 
         // ----- get all tables
 
-        // $_aTableList = $this->makeQuery($this->_aSql[$_sDriver]['gettables']);
-        $odbtables = $this->db->query($this->_aSql[$_sDriver]['gettables']);
-
-        $_aTableList = $odbtables->fetchAll(PDO::FETCH_COLUMN);
+        $_aTableList = $this->showTables();
         if(!$_aTableList || !count($_aTableList)){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
             return false;
@@ -439,8 +436,8 @@ class pdo_db
     }
 
     /**
-     * WIP :: EXPERIMENTAL
-     * Import data from a json file; reverse function to dump()
+     * Import data from a json file; reverse function of dump()
+     * @see dump()
      * @param  string   $sFile  json file
      * @return boolean
      */
@@ -448,6 +445,10 @@ class pdo_db
         $this->_wd(__METHOD__);
         if (!$this->db){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
+            return false;
+        }
+        if(!file_exists($sFile)){
+            $this->_log('error', '[DB]', __METHOD__, 'Cannot import. Given file does nt extist ['.$sFile.'].');
             return false;
         }
         $aResult = json_decode(file_get_contents($sFile), true);
@@ -465,13 +466,14 @@ class pdo_db
                 $this->_log('info', '[DB]', __METHOD__, 'Table ['.$sTablename.'] already exists. Skipping.');
             } else {
                 $sSql = $aTable['create'];
-                $this->db->query($sSql);    
+                $this->makeQuery($sSql);    
             }
 
-            // (2) insert data
+            // (2) insert data item by item
             foreach($aTable['data'] as $aRow){
-                $sSql = 'INSERT INTO `' . $sTablename . '` ('.implode(',',array_keys($aRow)).') VALUES ('.implode(',',array_values($aRow)).');';
-                $this->db->query($sSql);
+
+                $sSql = 'INSERT INTO `' . $sTablename . '` ('.implode(',',array_keys($aRow)).') VALUES (:'.implode(', :',array_keys($aRow)).');';
+                $this->makeQuery($sSql, $aRow);
             }
         }
         return true;
