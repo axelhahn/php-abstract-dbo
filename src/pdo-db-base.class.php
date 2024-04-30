@@ -61,6 +61,13 @@ class pdo_db_base
     protected $_aItem = [];
 
     /**
+     * flag if $_aItem has a change
+     * @var bool
+     */
+    protected $_bChanged = false;
+
+
+    /**
      * hash for a single announcement item with related data to
      * create database column, draw edit form
      * @var array 
@@ -395,7 +402,7 @@ class pdo_db_base
     public function new()
     {
         $this->_aItem = [];
-
+        $this->_bChanged = true;
         foreach ($this->_aDefaultColumns as $sKey => $aData) {
             $this->_aItem[$sKey] = $aData['dummyvalue'];
         }
@@ -429,6 +436,7 @@ class pdo_db_base
             return $this->id();
         }
         $this->_log('error', __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
+        $this->_bChanged = false;
         return false;
     }
 
@@ -441,6 +449,7 @@ class pdo_db_base
     public function read($iId, $bReadRelations = false)
     {
         $this->new();
+        $this->_bChanged = false;
         $sSql = 'SELECT * FROM `' . $this->_table . '` WHERE `id`=:id AND deleted=0';
         $aData=[
             'id'=>(int)$iId,
@@ -476,6 +485,11 @@ class pdo_db_base
      */
     public function update()
     {
+        if(! $this->_bChanged ){
+            // echo "SKIP update - no change.".PHP_EOL;
+            $this->_log('info', __METHOD__, 'Skip database update: dataset was not changed.');
+            return false;
+        }
         // prepare default columns
         $this->_aItem['timeupdated'] = $this->_getCurrentTime();
 
@@ -487,6 +501,7 @@ class pdo_db_base
         $sSql = 'UPDATE `' . $this->_table . '` ' . 'SET ' . $sSql . ' WHERE `id` = :id';
         $return = $this->makeQuery($sSql, $this->_aItem);
         if (is_array($return)) {
+            $this->_bChanged = false;
             return $this->id();
         }
         return false;
@@ -515,6 +530,7 @@ class pdo_db_base
                     if ($iId == $this->id()) {
                         $this->new();
                     }
+                    $this->_bChanged = false;
                     return true;
                 } else {
                     $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Deletion if item with id [' . $iId . '] failed.');
@@ -776,15 +792,35 @@ class pdo_db_base
 
     /**
      * get relations of the current item
+     * @param  array  $aFilter  optional: filter existing relaions by table and column
+     *                          Keys:
+     *                            table => <TARGETTABLE>  table must match
+     *                            column => <COLNAME>     column name must match too
      * @return array
      */
-    public function relRead()
+    public function relRead($aFilter=[])
     {
         $this->_wd(__METHOD__ . '() reading relations for ' . $this->_table . ' item id ' . $this->id());
         if (is_array($this->_aRelations) && !count($this->_aRelations)) {
             $this->_relRead();
         }
-        return $this->_aRelations;
+        
+        if(isset($aFilter['table'])){
+            $aReturn=[];
+            foreach($this->_aRelations as $sKey => $aRelation) {
+                if($aRelation['table']==$aFilter['table']){
+                    if (
+                        !isset($aFilter['column'])
+                        || (isset($aFilter['column']) && $aRelation['table']==$aFilter['column'])
+                    ) {
+                        $aReturn[$sKey] = $aRelation;
+                    }
+                }
+            }
+        } else {
+            $aReturn=$this->_aRelations;
+        }
+        return $aReturn;
     }
     /**
      * delete a single relation from current item
@@ -975,13 +1011,19 @@ class pdo_db_base
             [ 'regex' =>'/^number/',   'tag' => 'input',    'type' => 'number'         ],
         ];
 
-        $aReturn = ['debug'=>[]];
+        
+        $aReturn = [];
+        if(isset($this->_aProperties[$sAttr]['attr'])) {
+            $aReturn=$this->_aProperties[$sAttr]['attr'];
+        }
+        $aReturn['debug']=[];
         if (isset($this->_aProperties[$sAttr]['form'])) {
             $aReturn = $this->_aProperties[$sAttr]['form'];
             $aReturn['debug']['_origin'] = 'fixed config value';
         } else {
             $aReturn['debug']['_origin'] = 'no config ... I need to guess';
 
+            
             $sCreate=$this->_aProperties[$sAttr]['create'];
             // everything before an optional "(" 
             $sBasetype=strtolower(preg_replace('/\(.*$/', '', $sCreate));
@@ -1030,12 +1072,33 @@ class pdo_db_base
                 }
             }
 
-            // print_r($aMatches); die();
-
         }
         $aReturn['name'] = $sAttr;
+        $aReturn['label'] = isset($aReturn['label']) ? $aReturn['label'] : $sAttr;
+
+        if (isset($aReturn['required']) && $aReturn['required']){
+            $aReturn['label'].=' <span class="required">*</span>';
+        }
+        // echo "<pre>"; print_r($aReturn); die();
         return $aReturn;
     }
+
+    /**
+     * get bool if the current dataset item was changed
+     * @return bool
+     */
+    public function hasChange(){
+        return $this->_bChanged;
+    }
+    
+    /**
+     * get current table
+     * @return string
+     */
+    public function getTable(){
+        return $this->_table;
+    }
+
     // ----------------------------------------------------------------------
     // SEARCH
     // ----------------------------------------------------------------------
@@ -1140,9 +1203,8 @@ class pdo_db_base
                         $_bValError = $_bValError || !is_string($value);
                         break;
                     case 'integer':
-                        // echo "found<br>";
-                        $_bValOK = $_bValOK       && is_integer($value);
-                        $_bValError = $_bValError || !is_integer($value);
+                        $_bValOK = $_bValOK       && ctype_digit(strval($value));
+                        $_bValError = $_bValError || !ctype_digit(strval($value));
                         break;
                     default:
                         echo "ERROR: [$sFunc] is not supported yet.<br>";
@@ -1162,7 +1224,14 @@ class pdo_db_base
             // echo "--> OK: " .($_bValOK ? 'true':'false')." | Error: ".($_bValError ? 'true':'false')."<br>";
             if ($_bValOK && !$_bValError) {
                 // echo "SET<br>";
-                $this->_aItem[$sKey2Set] = $value;
+                if ($this->_aItem[$sKey2Set] !== $value) {
+                    // echo "SET<br>";
+                    $this->_bChanged = true;
+                    $this->_aItem[$sKey2Set] = $value;
+                } else {
+                    // echo "SKIP: new value fo $sKey2Set is existing value<br>";
+                }
+                
                 return true;
             } else {
                 echo "SKIP '$sKey2Set' => '$value' -- validation failed<br>";
