@@ -433,10 +433,10 @@ class pdo_db_base
         $result = $this->makeQuery($sSql, $this->_aItem);
         if (is_array($result)) {
             $this->_aItem['id'] = $this->_pdo->db->lastInsertId();
+            $this->_bChanged = false;
             return $this->id();
         }
         $this->_log('error', __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
-        $this->_bChanged = false;
         return false;
     }
 
@@ -963,11 +963,12 @@ class pdo_db_base
             return false;
         }
         $sReturn = '';
-        $sId = $aItem['id'];
+        $sId = isset($aItem['id']) ? $aItem['id'] : false;
         foreach ($this->getBasicAttributes() as $sKey) {
             $sReturn .= $sKey !== 'id' ? $aItem[$sKey] . ' - ' : '';
         }
-        return rtrim($sReturn, ' - ') . ' [' . $sId . ']';
+        return rtrim($sReturn, ' - ');
+        // return rtrim($sReturn, ' - ') . ' [' . $sId . ']';
     }
     /**
      * get current item

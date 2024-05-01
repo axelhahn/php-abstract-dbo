@@ -248,7 +248,13 @@ class pdo_db
     }
 
     /**
-     * get the last error message.
+     * get the last error message (from a query or a failed method).
+     * 
+     * @example:
+     * to get the last failed database query use lastquery check
+     * <code>if($o->error()) { echo $o->lastquery()['error']}</code>
+     *
+     * @see lastquery()
      * @return string
      */
     public function error()
@@ -264,9 +270,15 @@ class pdo_db
      *   - method  {string}  name of the method that triggered the query
      *   - sql     {string}  executed sql query
      *   - data    {array}   optional: data array (when using prepare statement)
-     *   - time    {float}   execution time in ms
-     *   - records {integer} count of returned records on SELECT or affected rows on INSERT, UPDATE or DELETE
+     *   - time    {float}   optional: execution time in ms
+     *   - records {integer} optional: count of returned records on SELECT or affected rows on INSERT, UPDATE or DELETE
      *   - error   {string}  optional:PDO error message
+     *
+     * @example:
+     * to get the last failed database query use lastquery check
+     * <code>if($o->error()) { echo $o->lastquery()['error']}</code>
+     *
+     * @see error()
      * @return array|bool
      */
     public function lastquery()
