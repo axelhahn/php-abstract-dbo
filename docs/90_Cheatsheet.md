@@ -10,7 +10,7 @@
 | ``$oDB->showErrors(BOOL)``      | {bool}    | enable/ disable showing errors
 | INFOS FOR DEBUGGING
 | ``$oDB->error()``               | {string}  | get the last error
-| ``$oDB->lastquery()``           | {array}   | get an array of last query
+| ``$oDB->lastquery(BOOL)``       | {array}   | get an array of last query; if true, then it returns the last db error entry
 | ``$oDB->logs()``                | {array}   | get an array of all log messages (errors and others)
 | ``$oDB->queries()``             | {array}   | get an array of all queries
 | INFOS
@@ -49,6 +49,8 @@
 | INFOS
 | ``$o->count()``                 | {integer} | get count of existing items for the current item type
 | ``$o->getAttributes()``         | {array}   | get list of attributes
+| ``$o->getDescriptionline()``    | {string}  | get name string built from main columns
+| ``$o->getLabel()``              | {string}  | get name string built from first of main columns (eg. label)
 | ``$o->getTable()``              | {string}  | get name of database table for current object
 | ``$o->hasChange()``             | {bool}    | check if the current item was changed after applying set() or setItem()
 | ``$o->id()``                    | {integer} | get id of current item

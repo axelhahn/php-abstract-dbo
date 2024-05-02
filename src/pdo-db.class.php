@@ -52,6 +52,7 @@ class pdo_db
     protected $_bDebug = false;
 
     protected $_iLastError = false;
+    protected $_iLastDBError = false;
 
     /**
      * executed queries and metadata or error
@@ -279,10 +280,17 @@ class pdo_db
      * <code>if($o->error()) { echo $o->lastquery()['error']}</code>
      *
      * @see error()
+     * @param bool $bLastError  optional: flag to return the last failed query
      * @return array|bool
      */
-    public function lastquery()
+    public function lastquery($bLastError=false)
     {
+        if($bLastError){
+            return $this->_iLastDBError===false 
+                ? false
+                : $this->_aQueries[$this->_iLastDBError]
+            ;
+        }
         if (count($this->_aQueries)) {
             return $this->_aQueries[count($this->_aQueries) - 1];
         }
@@ -358,7 +366,9 @@ class pdo_db
         return $_aTableList;
     }
     /**
-     * execute a sql statement and put metadata / error messages into the log
+     * execute a sql statement and put analyses metadata + error messages into the 
+     * log
+     * 
      * @param  string  $sSql   sql statement
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
      * @param  string  $_table optional: table name to add to log
@@ -382,6 +392,8 @@ class pdo_db
             $aLastQuery['error'] = 'PDO ERROR: ' . $e->getMessage();
             $this->_log('error', $_table, __METHOD__, "{'.$_table.'} Query [$sSql] failed: " . $aLastQuery['error'] . ' See $DB->queries().');
             $this->_aQueries[] = $aLastQuery;
+            $this->_iLastDBError=(count($this->_aQueries) - 1);
+
             return false;
         }
         $_aData = $result->fetchAll(PDO::FETCH_ASSOC);

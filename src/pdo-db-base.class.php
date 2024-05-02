@@ -729,7 +729,7 @@ class pdo_db_base
             return true;
         }
         // print_r($this->error());
-        $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} Unable to save relation ' . print_r($aTmp, 1));
+        $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} Unable to save relation.');
         return false;
     }
 
@@ -970,6 +970,21 @@ class pdo_db_base
         return rtrim($sReturn, ' - ');
         // return rtrim($sReturn, ' - ') . ' [' . $sId . ']';
     }
+    /**
+     * get a label for the item.
+     * It fetches the 1st of basic attributes. Alternatively it uses the id
+     * @return mixed bool|string
+     */
+    public function getLabel($aItem = false)
+    {
+        $aItem = $aItem ? $aItem : $this->_aItem;
+        if (!$aItem) {
+            return false;
+        }
+        $sFirstKey=$this->getBasicAttributes()[0];
+        return isset($aItem[$sFirstKey]) && $aItem[$sFirstKey] ? $aItem[$sFirstKey] : '#'.$aItem['id'];
+    }
+
     /**
      * get current item
      * @return integer
