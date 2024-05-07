@@ -55,7 +55,7 @@ return [
 
 ### Create your object class
 
-This is an example class "objexample" with 2 properties "label" and "description":
+This is a minimal example class "objexample" with 2 properties "label" and "description":
 
 ```php
 <?php
@@ -88,6 +88,14 @@ See [Sqlite datatypes](https://www.sqlite.org/datatype3.html)
 | create                       | {string}    | column definition for the sql CREATE statement
 | validate_is                  | {string}    | optional; if set a item value is checked: validate type - one of string|integer
 | validate_regex               | {string}    | optional; if set a item value is checked: validate regey - eg. ``'/^[a-z]*$/'``
+
+For the web UI of Axels ObjectManager you additionally can set:
+
+| Key                          | Type        | Description
+|---                           |:---:        |---
+| attr                         | {array}     | Key and value are the attributes of the form element.<br>- The key "label" is used as label next to the input field.<br>- Set "placeholder" for text input fields<br>- set "required" => "required" to mark a must field
+| lookup                       | {array}     | Lookup to another table for a 1:1 relation. The web ui will show a select box. Keys are:<br>- "table" => {string} [TARGET_TABLE]<br>- "colums" => {array} [LIST_OF_COLUMNS_TO_SHOW]<br>- "where" => {string} [WHERE_CLAUSE]
+| force                        | {array}     | There is an autodetection to render "a good" input field based on type of column, size and column name. All attributes given in this hash disable automatic values and you can force any input tag and attributes you want.
 
 ### Add in your code
 

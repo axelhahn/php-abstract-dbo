@@ -43,6 +43,7 @@
 | ``$o->relDelete(RELID)``        | {bool}    | delete a single relation of the current item 
 | ``$o->relDeleteAll()``          | {bool}    | delete all relation of the current item 
 | ``$o->relDeleteAll(ID)``        | {bool}    | delete all relation of given item 
+| ``$o->getRelLabel(COLUMN)``     | {string}  | for 1:1 lookups: get the label of the item in the related lookup table
 | MORE DATABASE
 | ``$o->flush()``                 | {bool}    | DANGEROUS: delete all items of the current object type by dropping its table
 | ``$o->save()``                  | {bool}    | selects automatically create() or update() to store an item

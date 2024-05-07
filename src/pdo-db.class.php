@@ -366,9 +366,7 @@ class pdo_db
         return $_aTableList;
     }
     /**
-     * execute a sql statement and put analyses metadata + error messages into the 
-     * log
-     * 
+     * execute a sql statement and put metadata / error messages into the log
      * @param  string  $sSql   sql statement
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
      * @param  string  $_table optional: table name to add to log
