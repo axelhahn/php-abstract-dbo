@@ -141,11 +141,13 @@ class pdo_db
     /**
      * add a log message for current object
      * @param  string  $sLevel    loglevel; one of inf|warn|error
-     * @param  string  $sMethod   the method where the error occured
+     * @param  string  $sTable    table/ object
+     * @param  string  $sMethod   the method where the message comes from
      * @param  string  $sMessage  the error message
      */
     public function _log($sLevel, $sTable, $sMethod, $sMessage)
     {
+
         $this->_aLogmessages[] = [
             'loglevel' => $sLevel,
             'table' => $sTable,
@@ -407,9 +409,10 @@ class pdo_db
      * 
      * @see import()
      * @param string $sOutfile  optional: output file name
+     * @param array  $aTables   optional: array of tables to dump; default: false (dumps all tables)
      * @return mixed  array of data on success or false on error
      */
-    public function dump($sOutfile=false){
+    public function dump($sOutfile=false, $aTables=false){
 
         $aResult=[];
         $aResult['timestamp']=date("Y-m-d H:i:s");
@@ -428,8 +431,7 @@ class pdo_db
         }
 
         // ----- get all tables
-
-        $_aTableList = $this->showTables();
+        $_aTableList = $aTables ? $aTables :$this->showTables();
         if(!$_aTableList || !count($_aTableList)){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
             return false;
@@ -459,11 +461,35 @@ class pdo_db
 
     /**
      * Import data from a json file; reverse function of dump()
+     * TODO: handle options array
+     * 
+     * @example:
+     * $aOptions = [
+     *     'global' => [
+     *         'drop' => false,
+     *         'create-if-not-exists' => true,
+     *         'import' => true,
+     *     ],
+     *     // when given, only these tables will be imported
+     *     'tables' => [
+     *         'table1' => [
+     *              // optionally: override global settings
+     *             'drop' => false,
+     *             'create-if-not-exists' => true,
+     *             'import' => true,
+     *         ],
+     *         'tableN' => [
+     *             ...
+     *         ]
+     ]
      * @see dump()
-     * @param  string   $sFile  json file
+     * @param  string   $sFile     json file to import
+     * @param  array    $aOptions  optional: options array with these keys
+     *                               - 'global' {array}  options for all tables 
+     *                               - 'tables' {array}  options for all tables 
      * @return boolean
      */
-    public function import($sFile){
+    public function import($sFile, $aOptions){
         $this->_wd(__METHOD__);
         if (!$this->db){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
