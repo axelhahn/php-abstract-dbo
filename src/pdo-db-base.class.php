@@ -442,7 +442,7 @@ class pdo_db_base
                 if(isset($aCol['lookup']) && $this->_aItem[$sCol]){
                     $sTargetTable=$aCol['lookup']['table'];
                     if (!$this->relCreate($sTargetTable, $this->_aItem[$sCol], $sCol)) {
-                        $this->_log('error', __METHOD__, 'Creation of relation from table {'.$this->_table.'.'.$sCol.'} to table '.$sTargetTable.' failed.');
+                        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Creation of relation from table {'.$this->_table.'.'.$sCol.'} to table '.$sTargetTable.' failed.');
                         return false;
                     }
                 }
@@ -450,7 +450,7 @@ class pdo_db_base
 
             return $this->id();
         }
-        $this->_log('error', __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
+        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Creation of new database entry {' . $this->_table . '} failed.');
         return false;
     }
 
@@ -464,6 +464,7 @@ class pdo_db_base
     {
         $this->_wd(__METHOD__);
         $this->new();
+
         $this->_bChanged = false;
         $sSql = 'SELECT * FROM `' . $this->_table . '` WHERE `id`=:id AND deleted=0';
         $aData=[
@@ -480,7 +481,7 @@ class pdo_db_base
 
             return true;
         }
-        $this->_log('error', __METHOD__, 'Unable to read {' . $this->_table . '} item with id [' . $iId . '].');
+        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, 'Unable to read {' . $this->_table . '} item with id [' . $iId . '].');
         return false;
     }
 
@@ -494,7 +495,7 @@ class pdo_db_base
 
         // TODO: enable
         if(! $this->_bChanged ){
-            $this->_log('info', __METHOD__, 'Skip database update: dataset was not changed.');
+            $this->_log(PB_LOGLEVEL_INFO, __METHOD__, 'Skip database update: dataset was not changed.');
             return false;
         } else {
             // prepare default columns
@@ -765,24 +766,24 @@ class pdo_db_base
     {
         $this->_wd(__METHOD__ . "($sToTable, $iToId, $sFromColumn)");
         if (!$this->id()) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId, $sFromColumn)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId, $sFromColumn)", '{' . $this->_table . '} The current item was not saved yet. We need an id in a table to create a relation with it.');
             return false;
         }
         if (!isset($this->_aRelations)) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId, $sFromColumn)", "{'.$this->_table.'} The relation is disabled.");
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId, $sFromColumn)", "{'.$this->_table.'} The relation is disabled.");
             return false;
         }
 
         if (!preg_match('/^[a-z_]*$/', $sToTable)) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target table was not set.");
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target table was not set.");
             return false;
         }
         if (!$this->_pdo->tableExists($sToTable)) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "The target table {'.$sToTable.'} does not exist.");
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "The target table {'.$sToTable.'} does not exist.");
             return false;
         }
         if (!(int)$iToId) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target id is not set or not valid.");
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", "{'.$this->_table.'} The target id is not set or not valid.");
             return false;
         }
 
@@ -790,7 +791,7 @@ class pdo_db_base
         $aTmp = $this->_getRelationSortorder($this->_table, $this->id(), $sFromColumn, $sToTable, $iToId, NULL);
         $sKey = $this->_getRelationKey($sToTable, $iToId, $sToTable);
         if (isset($this->_aRelations[$sKey])) {
-            $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The relation already exists. It has the key ['.$sKey.'].');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} The relation already exists. It has the key ['.$sKey.'].');
             return false;
         }
 
@@ -803,7 +804,7 @@ class pdo_db_base
             return true;
         }
         // print_r($this->error());
-        $this->_log('error', __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} Unable to save relation.');
+        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sToTable, $iToId)", '{' . $this->_table . '} Unable to save relation.');
         return false;
     }
 
@@ -944,11 +945,11 @@ class pdo_db_base
     public function relDelete($sRelKey)
     {
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
-            $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
             return false;
         }
         if (!isset($this->_aRelations['_targets'][$sRelKey]['_relid'])) {
-            $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
             return false;
         }
         $oRelation = new pdo_db_relations($this->_pdo);
@@ -964,11 +965,11 @@ class pdo_db_base
     public function relUpdate($sRelKey, $iItemvalue){
         $this->_wd(__METHOD__ . "($sRelKey, $iItemvalue)");
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
-            $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
             return false;
         }
         if (!isset($this->_aRelations['_targets'][$sRelKey]['_relid'])) {
-            $this->_log('error', __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The key [_relid] was not found.');
             return false;
         }
 
@@ -979,7 +980,7 @@ class pdo_db_base
             ]))){
             return true;
         };
-        $this->_log('error', __METHOD__ . "($sRelKey, $iItemvalue)", 'Unable to update relation.');
+        $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey, $iItemvalue)", 'Unable to update relation.');
         return false;
     }
 
@@ -1090,7 +1091,7 @@ class pdo_db_base
         }
         $aReturn[] = 'id';
         if (count($aReturn) == 1) {
-            $this->_log('warning', __METHOD__, 'The object has no defined overview flag on any attribute');
+            $this->_log(PB_LOGLEVEL_WARN, __METHOD__, 'The object has no defined overview flag on any attribute');
         }
         return $aReturn;
     }
@@ -1217,7 +1218,7 @@ class pdo_db_base
     public function getFormtype($sAttr)
     {
         if (!isset($this->_aProperties[$sAttr])) {
-            $this->_log('error', __METHOD__ . '(' . $sAttr . ')', 'Attribute does not exist');
+            $this->_log(PB_LOGLEVEL_WARN, __METHOD__ . '(' . $sAttr . ')', 'Attribute does not exist');
             return false;
         }
 
@@ -1255,6 +1256,7 @@ class pdo_db_base
                     'value'=>[ 'id' ],             // what column put as value
                     'where'=>'',                   // where clause
                     'size'=> '10',                 // size for select box (1=dropdown)
+                    'bootstrap-select' => true     // use bootstrap-select plugin?
                 ]
                 */
     
@@ -1266,31 +1268,40 @@ class pdo_db_base
                 // echo "DEBUG: sSql = $sSql<br>";
                 $aLookupdata=$this->makeQuery($sSql);
                 $aReturn['tag']='select';
+                $aReturn['bootstrap-select']=isset($aLookup['bootstrap-select']) ? $aLookup['bootstrap-select'] : false;
+
 
                 unset($aReturn['type']);
                 $aReturn['size']=isset($aLookup['size']) && (int)$aLookup['size'] ? (int)$aLookup['size'] : 1;
 
                 // generate option tags for select box
                 $aOptions=[];
-                $aOptions[]=[
-                    'value'=>'',
-                    'label'=>'--- {{select_relation_item}} ---',
-                ];
 
                 // get relations that match the wanted lookup table and the current column
 
                 // loop over all entries of the looked up table
-                foreach($aLookupdata as $aOptionItem) {
-                    $bSelected=$aOptionItem['id']===$this->get($sAttr);
+                if($aLookupdata){
+                        $aOptions[]=[
+                            'value'=>'',
+                            'label'=>'--- {{select_relation_item}} ---',
+                        ];
+                        foreach($aLookupdata as $aOptionItem) {
+                        $bSelected=$aOptionItem['id']===$this->get($sAttr);
 
-                    $aOptions[]=[
-                        // 'value'=>$aLookup['table'].':'.$aOptionItem['id'],
-                        'value'=>$aOptionItem['id'],
-                        'label'=>$this->getLabel($aOptionItem, $aLookup['columns']),
-                    ];
-                    if($bSelected){
-                        $aOptions[count($aOptions)-1]['selected']=true;
+                        $aOptions[]=[
+                            // 'value'=>$aLookup['table'].':'.$aOptionItem['id'],
+                            'value'=>$aOptionItem['id'],
+                            'label'=>$this->getLabel($aOptionItem, $aLookup['columns']),
+                        ];
+                        if($bSelected){
+                            $aOptions[count($aOptions)-1]['selected']=true;
+                        }
                     }
+                } else {
+                    $aOptions[]=[
+                        'value'=>'',
+                        'label'=>'--- {{select_no_data_set}} ---',
+                    ];    
                 }
                 $aReturn['options']=$aOptions;
 
@@ -1357,8 +1368,7 @@ class pdo_db_base
         }
 
         // DEBUG:
-        $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');
-        // echo "<pre>"; print_r($aReturn); die();
+        // $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');
 
         return $aReturn;
     }
@@ -1515,7 +1525,7 @@ class pdo_db_base
                 return true;
             } else {
                 echo "SKIP '$sKey2Set' => '$value' -- validation failed<br>";
-                $this->_log('warn', __METHOD__, '{' . $this->_table . '} value for ' . $sKey2Set . ' was not set because validaten failed');
+                $this->_log(PB_LOGLEVEL_WARN, __METHOD__, '{' . $this->_table . '} value for ' . $sKey2Set . ' was not set because validaten failed');
             }
         } else {
             throw new Exception(__METHOD__ . " - ERROR: The key [$sKey2Set] cannot be set for [" . $this->_table . "].");
