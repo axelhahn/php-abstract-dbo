@@ -147,7 +147,6 @@ class pdo_db
      */
     public function _log($sLevel, $sTable, $sMethod, $sMessage)
     {
-
         $this->_aLogmessages[] = [
             'loglevel' => $sLevel,
             'table' => $sTable,
@@ -454,7 +453,10 @@ class pdo_db
         // ----- optional: write to file
         if($sOutfile){
             $this->_wd(__METHOD__. ' Writing to '.$sOutfile);
-            file_put_contents($sOutfile, json_encode($aResult, JSON_PRETTY_PRINT));
+            if (!file_put_contents($sOutfile, json_encode($aResult, JSON_PRETTY_PRINT))){
+                $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Unable to write to file "'.$sOutfile.'" after successful dumping.');
+                return false;
+            };
         }
         return $aResult;
     }
@@ -489,7 +491,7 @@ class pdo_db
      *                               - 'tables' {array}  options for all tables 
      * @return boolean
      */
-    public function import($sFile, $aOptions){
+    public function import($sFile, $aOptions=false){
         $this->_wd(__METHOD__);
         if (!$this->db){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
