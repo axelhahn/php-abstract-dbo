@@ -993,29 +993,31 @@ class pdo_db_base
     public function relDeleteAll($iId = false)
     {
         $this->_wd(__METHOD__ . "($iId)");
-        if (!isset($this->_aRelations)) {
+        if (!isset($this->_aRelations['_targets'])) {
             return true;
         }
+
+        // when not deleting the current - but a given - id --> store current item + its relations
         if ($iId && $iId !== $this->id()) {
             $tmpItem = $this->_aItem;
             $tmpRel = $this->_aRelations;
             $this->read($iId, true);
         }
 
-        foreach (array_keys($this->_aRelations) as $sRelKey) {
+        $bOK=true;
+        foreach (array_keys($this->_aRelations['_targets']) as $sRelKey) {
+            $this->_log(PB_LOGLEVEL_INFO, __METHOD__ . "()", 'start this->relDelete("'.$sRelKey.'").');
             if (!$this->relDelete($sRelKey)) {
-                if (isset($tmpItem)) {
-                    $this->_aItem = $tmpItem;
-                    $this->_aRelations = $tmpRel;
-                }
-                return false;
+                $bOK=false;
+                break;
             };
         }
+        // restore current item + its relations when not deleting the current but a given id
         if (isset($tmpItem)) {
             $this->_aItem = $tmpItem;
             $this->_aRelations = $tmpRel;
         }
-        return true;
+        return $bOK;
     }
 
     /**
