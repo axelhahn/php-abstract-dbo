@@ -74,7 +74,7 @@ class objexample extends pdo_db_base{
         'description' => ['create' => 'TEXT',],
     ];
 
-    public function __construct($oDB)
+    public function __construct(object $oDB)
     {
         parent::__construct(__CLASS__, $oDB);
     }
