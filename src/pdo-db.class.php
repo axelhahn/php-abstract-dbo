@@ -491,10 +491,15 @@ class pdo_db
         // ----- optional: write to file
         if($sOutfile){
             $this->_wd(__METHOD__. ' Writing to '.$sOutfile);
-            if (!file_put_contents($sOutfile, json_encode($aResult, JSON_PRETTY_PRINT))){
-                $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Unable to write to file "'.$sOutfile.'" after successful dumping.');
+            if(!is_dir(dirname($sOutfile))){
+                $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Dump successful. Directory "'.dirname($sOutfile).'" does not exist. Output file cannot be written.');
                 return false;
-            };
+            } else {
+                if (!file_put_contents($sOutfile, json_encode($aResult, JSON_PRETTY_PRINT))){
+                    $this->_log(PB_LOGLEVEL_ERROR, '[DB]', __METHOD__, 'Unable to write to file "'.$sOutfile.'" after successful dumping.');
+                    return false;
+                };
+            }
         }
         return $aResult;
     }
