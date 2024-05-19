@@ -10,7 +10,7 @@ class pdo_db_attachments extends pdo_db_base{
      * create database column, draw edit form
      * @var array 
      */
-    protected $_aProperties = [
+    protected array $_aProperties = [
         'filename'       => ['create' => 'VARCHAR(255)','overview'=>1,],
         'mime'           => ['create' => 'VARCHAR(32)',],
         'description'    => ['create' => 'VARCHAR(2048)',],
@@ -19,7 +19,7 @@ class pdo_db_attachments extends pdo_db_base{
         'height'         => ['create' => 'INTEGER',],
     ];
 
-    public function __construct($oDB)
+    public function __construct(object $oDB)
     {
         parent::__construct(__CLASS__, $oDB);
     }

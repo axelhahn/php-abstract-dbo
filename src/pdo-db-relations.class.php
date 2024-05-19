@@ -8,7 +8,7 @@ class pdo_db_relations extends pdo_db_base{
      * create database column, draw edit form
      * @var array 
      */
-    protected $_aProperties = [
+    protected array $_aProperties = [
         // 'label'       => ['create' => 'TEXT',     'label' => 'Label',                 'descr' => '', 'type' => 'text',           'edit' => true, 'required' => true],
         'from_table'       => ['create' => 'VARCHAR(32)',   ],
         'from_id'          => ['create' => 'INTEGER',],
@@ -23,7 +23,7 @@ class pdo_db_relations extends pdo_db_base{
 
     ];
 
-    public function __construct($oDB)
+    public function __construct(object $oDB)
     {
         parent::__construct(__CLASS__, $oDB);
     }

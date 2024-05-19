@@ -46,25 +46,25 @@ class pdo_db_base
      * name of the database table
      * @var string
      */
-    protected $_table = false;
+    protected string $_table = '';
 
     /**
      * object of pdo database instance
      * @var object
      */
-    private $_pdo;
+    private object $_pdo;
 
     /**
      * a single object
      * @var array
      */
-    protected $_aItem = [];
+    protected array $_aItem = [];
 
     /**
      * flag if $_aItem has a change
      * @var bool
      */
-    protected $_bChanged = false;
+    protected bool $_bChanged = false;
 
 
     /**
@@ -72,24 +72,24 @@ class pdo_db_base
      * create database column, draw edit form
      * @var array 
      */
-    protected $_aProperties = [];
+    protected array $_aProperties = [];
 
     /**
      * relations of the current object
      * @var array
      */
-    private $_aAttachments = [];
+    private array $_aAttachments = [];
 
     /**
      * relations of the current object
      * @var array
      */
-    private $_aRelations = [];
+    private array|null $_aRelations = [];
 
     /**
      * default columns for each object type
      */
-    protected $_aDefaultColumns = [
+    protected array $_aDefaultColumns = [
         'id'          => [
             'create' => 'INTEGER primary key autoincrement',
             // 'extra' =>  'primary key autoincrement',
@@ -109,7 +109,7 @@ class pdo_db_base
      * 
      * @return array
      */
-    private $_aDbTypes = [];
+    private array $_aDbTypes = [];
 
     // ----------------------------------------------------------------------
     // CONSTRUCTOR
@@ -122,7 +122,7 @@ class pdo_db_base
      * @param  string $sDbConfig    database config file
      * @return boolean
      */
-    public function __construct($sObjectname, $oDB)
+    public function __construct(string $sObjectname, object $oDB)
     {
 
         $this->_table = $this->getTablename($sObjectname);
@@ -140,7 +140,7 @@ class pdo_db_base
         $this->_aRelations = ($sObjectname == 'axelhahn\pdo_db_relations') ? NULL : [];
         $this->new();
 
-        return true;
+        //  return true;
     }
 
     // ----------------------------------------------------------------------
@@ -153,7 +153,7 @@ class pdo_db_base
      * @param  string  $s      input string to generate a table name from
      * @return string
      */
-    public function getTablename($s)
+    public function getTablename(string $s) :string
     {
         return basename(str_replace('\\', '/', $s));
     }
@@ -163,7 +163,7 @@ class pdo_db_base
      * @param  string  $s      input string to generate a table name from
      * @return string
      */
-    protected function _getObjectFromTablename($s)
+    protected function _getObjectFromTablename(string $s) : string
     {
         return __NAMESPACE__ . '\\' . $s;
     }
@@ -171,16 +171,18 @@ class pdo_db_base
     /**
      * write debug output if enabled by flag
      * @param  string  $s  string to show
+     * @return bool
      */
-    protected function _wd($s)
+    protected function _wd(string $s) :bool
     {
         return $this->_pdo->_wd($s, $this->_table);
     }
+
     /**
      * helper function to insert timestamp for creation and update
      * @return string
      */
-    protected function _getCurrentTime()
+    protected function _getCurrentTime() :string
     {
         return date("Y-m-d H:i:s");
     }
@@ -194,7 +196,7 @@ class pdo_db_base
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
      * @return array|boolean
      */
-    public function makeQuery($sSql, $aData = [])
+    public function makeQuery(string $sSql, array $aData = []) :array|bool
     {
         $this->_wd(__METHOD__ . " ($sSql, " . (count($aData) ? "DATA[" . count($aData) . "]" : "NODATA") . ")");
         return $this->_pdo->makeQuery($sSql, $aData, $this->_table);
@@ -202,49 +204,10 @@ class pdo_db_base
 
 
     /**
-     * set specialties for PDO queries in sifferent database types
-     * 
-     * @return array
-     */
-    private function _getPdoDbSpecialties() {
-        $aReturn = [];
-        switch ($this->_pdo->driver()) {
-            case 'mysql':
-                $aReturn = [
-                    'AUTOINCREMENT' => 'AUTO_INCREMENT',
-                    'DATETIME' => 'TIMESTAMP',
-                    'INTEGER' => 'INT',
-                    // 'TEXT' => 'LONGTEXT',
-                    
-                    'createAppend' => 'CHARACTER SET utf8 COLLATE utf8_general_ci',
-                    
-                    'canIndex' => true,
-                    'canIndexUNIQUE' => true,
-                    'canIndexFULLTEXT' => false,
-                    'canIndexSPACIAL' => false,
-                ];
-                break;
-            case 'sqlite':
-                $aReturn = [
-                    'createAppend' => '',
-                    
-                    'canIndex' => true,
-                    'canIndexUNIQUE' => true,
-                    'canIndexFULLTEXT' => false,
-                ];
-                break;
-
-            default:
-                echo __METHOD__ . ' - type ' . $this->_pdo->driver() . ' was not implemented yet.<br>';
-                die();
-        }
-        return $aReturn;
-    }    
-    /**
      * create database table
      * @return bool
      */
-    private function _createDbTable()
+    private function _createDbTable() :bool
     {
         if ($this->_pdo->tableExists($this->_table)) {
             $this->_log(PB_LOGLEVEL_INFO, __METHOD__ . '()', '{' . $this->_table . '} Table already exists');
@@ -253,7 +216,11 @@ class pdo_db_base
 
         $sSql = '';
         $sSqlIndex = '';
-        $aDB=$this->_getPdoDbSpecialties();
+        $aDB=$this->_pdo->getSpecialties();
+        if(!$aDB){
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver());
+            return false;
+        }
 
         // db columns are default colums + columns for my object
         foreach (array_merge($this->_aDefaultColumns, $this->_aProperties) as $sCol => $aData) {
@@ -278,9 +245,13 @@ class pdo_db_base
     }
 
     /**
-     * ALPHA ... work in progress or to delete
+     * Verify database columns with current object configuration. It shows
+     * - missing columns
+     * - existing database columns that are not configured
+     * - columns with wrong type
+     * @return array|bool
      */
-    public function verifyColumns()
+    public function verifyColumns() :array|bool
     {
 
         $this->_wd(__METHOD__);
@@ -301,7 +272,11 @@ class pdo_db_base
             $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, '{' . $this->_table . '} Unable to get table infos by sql query: ' . $aDbSpecifics[$type]['sql'] . '');
             return false;
         }
-        $aDB=$this->_getPdoDbSpecialties();
+        $aDB=$this->_pdo->getSpecialties();
+        if(!$aDB){
+            $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '()', 'Unable to get database specifics. Database type not supported: ' . $this->_pdo->driver());
+            return false;
+        }
         $aReturn = ['_result' => ['errors' => 0, 'ok' => 0, 'messages' => []], 'tables' => []];
         $aCols = [];
         $iOK = 0;
@@ -384,8 +359,9 @@ class pdo_db_base
      * @param  string  $sLevel    loglevel; one of inf|warn|error
      * @param  string  $sMethod   the method where the error occured
      * @param  string  $sMessage  the error message
+     * @return bool
      */
-    protected function _log($sLevel, $sMethod, $sMessage)
+    protected function _log(string $sLevel, string $sMethod, string $sMessage) :bool
     {
         return $this->_pdo->_log($sLevel, $this->_table, $sMethod, $sMessage);
     }
@@ -399,7 +375,7 @@ class pdo_db_base
      * generate a hash for a new empty item
      * @return bool
      */
-    public function new()
+    public function new() :bool
     {
         $this->_aItem = [];
         $this->_bChanged = true;
@@ -414,11 +390,10 @@ class pdo_db_base
     }
 
     /**
-     * create a new entry
-     * @param  array  $aItem  new announcement data
-     * @return mixed bool|integer false on failure or new id on success
+     * create a new entry in the database
+     * @return bool|integer false on failure or new id on success
      */
-    public function create()
+    public function create() :bool|int
     {
         $this->_wd(__METHOD__);
 
@@ -455,12 +430,12 @@ class pdo_db_base
     }
 
     /**
-     * read an entry by given id
+     * read an entry  from database by given id
      * @param  int    $iId             id to read
      * @param  bool   $bReadRelations  read relation too? default: false
-     * @return mixed bool  success
+     * @return bool|int
      */
-    public function read($iId, $bReadRelations = false)
+    public function read(int $iId, bool $bReadRelations = false) :bool
     {
         $this->_wd(__METHOD__);
         $this->new();
@@ -487,9 +462,9 @@ class pdo_db_base
 
     /**
      * update entry; the field "id" is required to identify a single row in the table
-     * @return bool
+     * @return int|bool
      */
-    public function update()
+    public function update() :int|bool
     {
         $this->_wd(__METHOD__);
 
@@ -579,9 +554,9 @@ class pdo_db_base
      * @param  integer  $iId   optional: id of the entry to delete; default: delete current item
      * @return bool
      */
-    public function delete($iId = false)
+    public function delete(int $iId = 0) :bool
     {
-        $iId = (int)$iId ? (int)$iId : $this->id();
+        $iId = $iId ? $iId : $this->id();
         if ($iId) {
             if ($this->relDeleteAll($iId)) {
 
@@ -621,7 +596,7 @@ class pdo_db_base
      * removes the schema from database
      * @return bool
      */
-    public function flush()
+    public function flush() :bool
     {
         // - delete relations from_table and to_table
         if (!$this->relFlush()) {
@@ -640,7 +615,7 @@ class pdo_db_base
      * save item
      * @return bool
      */
-    public function save()
+    public function save() :bool
     {
         return $this->id()
             ? $this->update()
@@ -658,7 +633,7 @@ class pdo_db_base
      * @param  string   $sCol     optional: column name wuith lookup
      * @return string
      */
-    protected function _getRelationKey($sToTable, $iToId, $sSourceCol=false)
+    protected function _getRelationKey(string $sToTable, int $iToId, string|null $sSourceCol='') :string
     {
         return ''
             .$sSourceCol 
@@ -678,7 +653,7 @@ class pdo_db_base
      * @param  string   $sToCol      column name
      * @return string
      */
-    protected function _getRelationUuid($sFromTable, $iFromId, $sFromCol, $sToTable, $iToId, $sToCol)
+    protected function _getRelationUuid(string $sFromTable, int $iFromId, string|null $sFromCol, string $sToTable, int $iToId, string|null $sToCol) :string
     {
         return md5(
             $sFromTable . ':' . $iFromId . ':' . $sFromCol
@@ -696,7 +671,7 @@ class pdo_db_base
      * @param  integer  $iId2     second table id
      * @return array
      */
-    protected function _getRelationSortorder($sTable1, $iId1, $sCol1, $sTable2, $iId2, $sCol2)
+    protected function _getRelationSortorder(string $sTable1, int $iId1, string|null $sCol1, string $sTable2, int $iId2, string|null $sCol2) :array
     {
         $aReturn = ($sTable1 < $sTable2 || ($sTable1 == $sTable2 && $iId1 < $iId2))
             ? [
@@ -725,7 +700,7 @@ class pdo_db_base
      * @param  array $aRelitem relation item array [from_table, from_id, from_column, to_table, to_id, to_columnuuid]
      * @return bool
      */
-    protected function _addRelationToItem($aRelitem = [])
+    protected function _addRelationToItem(array $aRelitem = []) :bool
     {
         $this->_wd(__METHOD__ . '()');
         if (!isset($this->_aRelations)) {
@@ -762,7 +737,7 @@ class pdo_db_base
      * @param  string  $sFromColumn  optional: source column
      * @return bool
      */
-    public function relCreate($sToTable, $iToId, $sFromColumn=NULL)
+    public function relCreate(string $sToTable, int $iToId, string|null $sFromColumn=NULL) :bool
     {
         $this->_wd(__METHOD__ . "($sToTable, $iToId, $sFromColumn)");
         if (!$this->id()) {
@@ -814,7 +789,7 @@ class pdo_db_base
      * This function is used in methods read() and relRead()
      * @return bool
      */
-    protected function _relRead()
+    protected function _relRead() :bool
     {
         if (!isset($this->_aRelations)) {
             return false;
@@ -857,19 +832,6 @@ class pdo_db_base
                     '_relid' => $aEntry['id'],
                     '_target' => $aTargetItem,
                 ];
-
-                // TODO: map into the item: really useful??
-                /*
-                $sItemkey=$this->_aRelations['_targets'][$sRelKey]['column'] 
-                    ? 'rel_'.$this->_aRelations['_targets'][$sRelKey]['column'] 
-                    : 'rel_'.$aEntry[$sTableKey . '_table'];
-                $sItemkey='rel_'.$aEntry[$sTableKey . '_table'];
-                // echo '<pre>'; print_r($sItemkey); print_r($aEntry); 
-                if(!isset($this->_aItem[$sItemkey])){
-                    $this->_aItem[$sItemkey]=[];
-                }
-                $this->_aItem[$sItemkey][] = $aEntry[$sTableKey . '_id'];
-                */
             }
         }
 
@@ -911,7 +873,7 @@ class pdo_db_base
      *                            column => <COLNAME>     column name must match too
      * @return array
      */
-    public function relRead($aFilter=[])
+    public function relRead(array $aFilter=[]) :array
     {
         $this->_wd(__METHOD__ . '() reading relations for ' . $this->_table . ' item id ' . $this->id());
         if (is_array($this->_aRelations) && !count($this->_aRelations)) {
@@ -942,7 +904,7 @@ class pdo_db_base
      * @param  string  $sRelKey  key of the relation; a string like 'table:id'
      * @return bool
      */
-    public function relDelete($sRelKey)
+    public function relDelete(string $sRelKey) :bool
     {
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
             $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
@@ -962,7 +924,7 @@ class pdo_db_base
      * @param  integer  $sRelKey  pointer to new id on target db
      * @return bool
      */
-    public function relUpdate($sRelKey, $iItemvalue){
+    public function relUpdate(string $sRelKey, int $iItemvalue) :bool{
         $this->_wd(__METHOD__ . "($sRelKey, $iItemvalue)");
         if (!isset($this->_aRelations['_targets'][$sRelKey])) {
             $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . "($sRelKey)", '{' . $this->_table . '} The given key does not exist.');
@@ -990,7 +952,7 @@ class pdo_db_base
      * called by delete(ID) before deleting the item itself
      * @param  integer  $iId  if of an item; default: false (=current item)
      */
-    public function relDeleteAll($iId = false)
+    public function relDeleteAll(int $iId = 0) :bool
     {
         $this->_wd(__METHOD__ . "($iId)");
         if (!isset($this->_aRelations['_targets'])) {
@@ -1025,7 +987,7 @@ class pdo_db_base
      * called by flush() before deleting all items of a type
      * @return bool
      */
-    public function relFlush()
+    public function relFlush() :bool
     {
         $sSql = 'DELETE FROM `pdo_db_relations` WHERE `from_table`="' . $this->_table . '" OR `to_table`="' . $this->_table . '"';
         return is_array($this->makeQuery($sSql));
@@ -1038,16 +1000,17 @@ class pdo_db_base
      * get count of existing items
      * @return integer
      */
-    public function count()
+    public function count() :int
     {
         $aTmp = $this->makeQuery('SELECT count(id) AS count FROM `' . $this->_table . '` WHERE deleted=0');
         return isset($aTmp[0]['count']) ? $aTmp[0]['count'] : 0;
     }
     /**
-     * get id of the current item
-     * @return integer
+     * get id of the current item as integer
+     * it returns false if there is no id
+     * @return int|bool
      */
-    public function id()
+    public function id() :int|bool
     {
         return (int)$this->_aItem['id'] ? (int)$this->_aItem['id'] : false;
     }
@@ -1056,9 +1019,9 @@ class pdo_db_base
      * get a single property of an item.
      * opposite function of set(KEY, VALUE)
      * @param  string  $sKey2Get  key of your object to set
-     * @return *
+     * @return mixed
      */
-    public function get($sKey2Get)
+    public function get(string $sKey2Get) :mixed
     {
         if (array_key_exists($sKey2Get, $this->_aItem)) {
             return $this->_aItem[$sKey2Get];
@@ -1072,7 +1035,7 @@ class pdo_db_base
      * @param  bool  $bWithValues  flag: including values? default: false
      * @return array
      */
-    public function getAttributes($bWithValues = false)
+    public function getAttributes(bool $bWithValues = false) :array
     {
         return $bWithValues
             ? $this->_aProperties
@@ -1080,10 +1043,9 @@ class pdo_db_base
     }
     /**
      * get array of main attributes to show in overview or to select a relation 
-     * @param  bool  $bWithValues  flag: including values? default: false
      * @return array
      */
-    public function getBasicAttributes()
+    public function getBasicAttributes() :array
     {
         $aReturn = [];
         foreach ($this->_aProperties as $sKey => $aDefs) {
@@ -1098,24 +1060,35 @@ class pdo_db_base
         return $aReturn;
     }
 
-    /**
-     * get a single line for a database row description
-     * @return mixed bool|string
+     /**
+     * Get a single line for a database row description
+     *
+     * It fetches the basic attributes of the item and creates a single line string
+     * with values of the item, separated by dashes.
+     * If the item has no data, it returns false.
+     *
+     * @param  array  $aItem  item data; default: current item
+     * @return bool|string
      */
-    public function getDescriptionLine($aItem = false)
-    {
-        $aItem = $aItem ? $aItem : $this->_aItem;
+     public function getDescriptionLine(array $aItem = []) :bool|string
+     {
+        // Fetch the item data, if not given
+         $aItem = count($aItem) ? $aItem : $this->_aItem;
+
+        // If the item has no data, return false
         if (!$aItem) {
             return false;
         }
+
+        // Create a single line string with values of the item, separated by dashes
         $sReturn = '';
-        $sId = isset($aItem['id']) ? $aItem['id'] : false;
         foreach ($this->getBasicAttributes() as $sKey) {
             $sReturn .= $sKey !== 'id' ? $aItem[$sKey] . ' - ' : '';
         }
-        return rtrim($sReturn, ' - ');
-        // return rtrim($sReturn, ' - ') . ' [' . $sId . ']';
-    }
+
+        // Remove the trailing dash
+         return rtrim($sReturn, ' - ');
+     }
     /**
      * get a label for the item.
      * It fetches the basic attributes if needed. 
@@ -1125,12 +1098,12 @@ class pdo_db_base
      * @param  array  $aColumns  array of columns to show
      * @return mixed bool|string
      */
-    public function getLabel($aItem = false, $aColumns=false)
+    public function getLabel(array $aItem = [], array $aColumns=[]) :string
     {
         // which columns to look for?
         $aDefaultColumns=[ 'label', 'displayname'];
 
-        if (!$aItem) {
+        if (!count($aItem)) {
             $aItem = $this->_aItem;
             if(!$aColumns){
                 $aColumns=[$this->getBasicAttributes()[0]];
@@ -1146,7 +1119,7 @@ class pdo_db_base
             }
         }
 
-        if (!$aItem) {
+        if (!count($aItem)) {
             return false;
         }
 
@@ -1169,9 +1142,9 @@ class pdo_db_base
      * connected item of the lookup table
      * 
      * @param string  $sColumn  name of the lookup column
-     * @return string
+     * @return string|bool
      */
-    public function getRelLabel($sColumn){
+    public function getRelLabel(string $sColumn) :string|bool {
         if (!isset($this->_aProperties[$sColumn]['lookup']['table'])){
             throw new Exception(__METHOD__.' Column '.$sColumn.' is not a lookup column');            
         }
@@ -1193,7 +1166,7 @@ class pdo_db_base
      * get current item as an array
      * @return array
      */
-    public function getItem()
+    public function getItem() :array
     {
         return $this->_aItem;
     }
@@ -1217,7 +1190,7 @@ class pdo_db_base
      * @param  string  $sAttr  name of the property
      * @return array|bool
      */
-    public function getFormtype($sAttr)
+    public function getFormtype(string $sAttr) :array|bool
     {
         if (!isset($this->_aProperties[$sAttr])) {
             $this->_log(PB_LOGLEVEL_WARN, __METHOD__ . '(' . $sAttr . ')', 'Attribute does not exist');
@@ -1379,7 +1352,7 @@ class pdo_db_base
      * get bool if the current dataset item was changed
      * @return bool
      */
-    public function hasChange(){
+    public function hasChange() :bool {
         return $this->_bChanged;
     }
     
@@ -1387,7 +1360,7 @@ class pdo_db_base
      * get current table
      * @return string
      */
-    public function getTable(){
+    public function getTable() :string {
         return $this->_table;
     }
 
@@ -1404,7 +1377,7 @@ class pdo_db_base
      *                          - limit   - string
      * @return array|bool
      */
-    public function search($aOptions = [])
+    public function search(array $aOptions = []) :array|bool
     {
 
         $sColumns = '';
@@ -1476,7 +1449,7 @@ class pdo_db_base
      * @param  mixed     $value     new value to set
      * @return bool
      */
-    public function set($sKey2Set, $value)
+    public function set(string $sKey2Set, mixed $value) :bool
     {
         if (isset($this->_aProperties[$sKey2Set])) {
 
@@ -1542,7 +1515,7 @@ class pdo_db_base
      * @param  array  $aNewValues  new values to set; a subset of this->_aItem
      * @return bool
      */
-    public function setItem($aNewValues)
+    public function setItem(array $aNewValues) :bool
     {
         foreach (array_keys($aNewValues) as $sKey) {
             if (!isset($this->_aDefaultColumns[$sKey])) {

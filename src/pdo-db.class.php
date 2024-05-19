@@ -30,35 +30,35 @@ class pdo_db
      * object of pdo database instance
      * @var object
      */
-    public $db;
+    public object|null $db;
 
 
     /**
      * collected array of log messages
      * var @array
      */
-    protected $_aLogmessages = [];
+    protected array $_aLogmessages = [];
 
     /**
      * flag: show mysql errors and debug information?
      * @var boolean
      */
-    protected $_bShowErrors = false;
+    protected bool $_bShowErrors = false;
 
     /**
      * flag: show mysql errors and debug information?
      * @var boolean
      */
-    protected $_bDebug = false;
+    protected bool $_bDebug = false;
 
-    protected $_iLastError = false;
-    protected $_iLastDBError = false;
+    protected int $_iLastError = -1;
+    protected int $_iLastDBError = -1;
 
     /**
      * executed queries and metadata or error
      * @var array
      */
-    public $_aQueries = [];
+    public array $_aQueries = [];
 
     // ----------------------------------------------------------------------
 
@@ -66,17 +66,38 @@ class pdo_db
      * sql statements for different database types
      * @var array
      */
-    protected $_aSql = [
+    protected array $_aSql = [
         'sqlite' => [
             "gettables"=>'SELECT name FROM sqlite_schema WHERE type = "table" AND name NOT LIKE "sqlite_%";',
             "getcreate"=>'SELECT sql FROM sqlite_master WHERE name = "%s" ',
             'tableexists' => "SELECT name FROM sqlite_schema WHERE type ='table' AND name = '%s';",
 
+            'specialties' => [
+                'createAppend' => '',
+                
+                'canIndex' => true,
+                'canIndexUNIQUE' => true,
+                'canIndexFULLTEXT' => false,
+            ],
         ],
         'mysql' => [
             "gettables"=>'SHOW TABLES;',
             "getcreate"=>'SHOW CREATE TABLE %s"',
-            'tableexists' => "SHOW TABLES LIKE '%s';"
+            'tableexists' => "SHOW TABLES LIKE '%s';",
+
+            'specialties' => [
+                // replacements
+                'AUTOINCREMENT' => 'AUTO_INCREMENT',
+                'DATETIME' => 'TIMESTAMP',
+                'INTEGER' => 'INT',
+                
+                'createAppend' => 'CHARACTER SET utf8 COLLATE utf8_general_ci',
+                
+                'canIndex' => true,
+                'canIndexUNIQUE' => true,
+                'canIndexFULLTEXT' => false,
+                'canIndexSPACIAL' => false,
+            ],
         ]
     ];
 
@@ -99,7 +120,7 @@ class pdo_db
      *                          - showerrors {bool} enable error messages? default: false
      * @return boolean
      */
-    public function __construct($aOptions=[])
+    public function __construct(array $aOptions=[])
     {
 
         $sDbConfig = (isset($aOptions['cfgfile']) && is_file($aOptions['cfgfile']))
@@ -130,8 +151,9 @@ class pdo_db
      * write debug output if enabled by flag
      * @param  string  $s       string to show
      * @param  string  $sTable  optional: table
+     * @return bool
      */
-    public function _wd($s, $sTable = false)
+    public function _wd(string $s, string $sTable = '') :bool
     {
         if ($this->_bDebug) {
             echo '<div style="color: #888; background: #f8f8f8;">DEBUG: ' . ($sTable ? '{' . $sTable . '}' : '') . '  - ' . $s . "</div>" . PHP_EOL;
@@ -144,8 +166,9 @@ class pdo_db
      * @param  string  $sTable    table/ object
      * @param  string  $sMethod   the method where the message comes from
      * @param  string  $sMessage  the error message
+     * @return bool
      */
-    public function _log($sLevel, $sTable, $sMethod, $sMessage)
+    public function _log(string $sLevel, string $sTable, string $sMethod, string $sMessage) :bool
     {
         $this->_aLogmessages[] = [
             'loglevel' => $sLevel,
@@ -168,11 +191,12 @@ class pdo_db
 
     /**
      * create a PDO connection
+     * @param  array $aOptions  array with these keys
      * @return bool
      */
-    public function setDatabase($aOptions)
+    public function setDatabase(array $aOptions) :bool
     {
-        $this->db = false;
+        $this->db = null;
 
         // echo '<pre>'.print_r($aOptions, 1).'</pre>';
         if (!$aOptions || !is_array($aOptions)) {
@@ -209,10 +233,10 @@ class pdo_db
     }
     /**
      * enable/ disable debug; database error is visible on enabled debug only
-     * @param  string|bool  $bNewValue  new debug mode; 0|false = off; any value=true
-     * @return boolean
+     * @param  bool  $bNewValue  new debug mode; 0|false = off; any value=true
+     * @return bool
      */
-    public function setDebug($bNewValue)
+    public function setDebug(bool $bNewValue) :bool
     {
         if ($this->_bDebug && !$bNewValue) {
             $this->_wd(__METHOD__ . " - Debug will be turned OFF.");
@@ -226,9 +250,9 @@ class pdo_db
     /**
      * enable/ disable debug; show error message if they occur
      * @param  string|bool  $bNewValue  new debug mode; 0|false = off; any value=true
-     * @return boolean
+     * @return bool
      */
-    public function showErrors($bNewValue)
+    public function showErrors(bool $bNewValue) :bool
     {
         $this->_bShowErrors = !!$bNewValue;
         // echo(__METHOD__." - ShowErrors is now ".($this->_bShowErrors ? "ON" : "OFF"));
@@ -241,14 +265,22 @@ class pdo_db
     // ----------------------------------------------------------------------
 
     /**
-     * get name of the current driver, eg. "mysql" or "sqlite"
-     * @return string
+     * Get name of the current driver, eg. "mysql" or "sqlite"
+     * If database is initialized yet it returns false
+     * @return string|bool
      */
-    public function driver()
+    public function driver() :string|bool
     {
         return $this->db ? $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) : false;
     }
 
+    /**
+     * get specialties of database properties for creating tables
+     * @return array
+     */
+    public function getSpecialties() :array {
+        return $this->_aSql[$this->driver()]['specialties'] ?? false ;
+    }
     /**
      * get the last error message (from a query or a failed method).
      * 
@@ -259,12 +291,12 @@ class pdo_db
      * @see lastquery()
      * @return string
      */
-    public function error()
+    public function error() :string
     {
         if ($this->_iLastError !== false) {
             return $this->_aLogmessages[$this->_iLastError]['message'];
         }
-        return "";
+        return '';
     }
 
     /**
@@ -284,7 +316,7 @@ class pdo_db
      * @param bool $bLastError  optional: flag to return the last failed query
      * @return array|bool
      */
-    public function lastquery($bLastError=false)
+    public function lastquery(bool $bLastError=false) :array|bool
     {
         if($bLastError){
             return $this->_iLastDBError===false 
@@ -300,8 +332,9 @@ class pdo_db
 
     /**
      * get an array with all log messages
+     * @return array
      */
-    public function logs()
+    public function logs() :array
     {
         return $this->_aLogmessages;
     }
@@ -317,7 +350,7 @@ class pdo_db
      *   - error   {string}  optional:PDO error message
      * @return array
      */
-    public function queries()
+    public function queries() :array
     {
         return $this->_aQueries;
     }
@@ -334,7 +367,7 @@ class pdo_db
      * @param string $table Table to search for.
      * @return bool TRUE if table exists, FALSE if no table found.
      */
-    function tableExists($table)
+    function tableExists(string $table) :bool
     {
         // Output debug information
         $this->_wd(__METHOD__);
@@ -352,7 +385,12 @@ class pdo_db
         return $result ? (bool)count($result) : false;
     }
 
-    public function showTables(){
+    /**
+     * get an array with all table names
+     * @return array
+     */
+    public function showTables() :array
+    {
         // $_aTableList = $this->makeQuery($this->_aSql[$_sDriver]['gettables']);
         $type = $this->driver();
         // If the database type is not supported, throw an exception
@@ -371,9 +409,9 @@ class pdo_db
      * @param  string  $sSql   sql statement
      * @param  array   $aData  array with data items; if present prepare statement will be executed 
      * @param  string  $_table optional: table name to add to log
-     * @return array|boolean
+     * @return array|bool
      */
-    public function makeQuery($sSql, $aData = [], $_table='')
+    public function makeQuery(string $sSql, array $aData = [], string $_table='') :array|bool
     {
         $this->_wd(__METHOD__ . " ($sSql, " . (count($aData) ? "DATA[" . count($aData) . "]" : "NODATA") . ")");
         $aLastQuery = ['method' => __METHOD__, 'sql' => $sSql];
@@ -411,7 +449,8 @@ class pdo_db
      * @param array  $aTables   optional: array of tables to dump; default: false (dumps all tables)
      * @return mixed  array of data on success or false on error
      */
-    public function dump($sOutfile=false, $aTables=false){
+    public function dump(string $sOutfile='', array $aTables=[]) :array|bool
+    {
 
         $aResult=[];
         $aResult['timestamp']=date("Y-m-d H:i:s");
@@ -430,7 +469,7 @@ class pdo_db
         }
 
         // ----- get all tables
-        $_aTableList = $aTables ? $aTables :$this->showTables();
+        $_aTableList = count($aTables) ? $aTables :$this->showTables();
         if(!$_aTableList || !count($_aTableList)){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot dump. No tables were found.');
             return false;
@@ -448,7 +487,6 @@ class pdo_db
             $odbtables = $this->db->query('SELECT * FROM `' . $sTablename . '` ');
             $aResult['tables'][$sTablename]['data']=$odbtables->fetchAll(PDO::FETCH_ASSOC);
         }
-        //print_r($aResult);
 
         // ----- optional: write to file
         if($sOutfile){
@@ -491,7 +529,8 @@ class pdo_db
      *                               - 'tables' {array}  options for all tables 
      * @return boolean
      */
-    public function import($sFile, $aOptions=false){
+    public function import(string $sFile, array $aOptions=[]) :bool 
+    {
         $this->_wd(__METHOD__);
         if (!$this->db){
             $this->_log('warning', '[DB]', __METHOD__, 'Cannot import. Database was not set yet.');
