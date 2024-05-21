@@ -529,7 +529,7 @@ class pdo_db
      ]
      * @see dump()
      * @param  string   $sFile     json file to import
-     * @param  array    $aOptions  optional: options array with these keys
+     * @param  array    $aOptions  UNUSED optional: options array with these keys
      *                               - 'global' {array}  options for all tables 
      *                               - 'tables' {array}  options for all tables 
      * @return boolean
