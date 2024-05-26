@@ -1,59 +1,26 @@
-
 ## How to use this class
 
-### Introduction
+This page gives you an idea how Axels pdo-db classes can be used.
 
 There are 2 abstract classes:
 
-* a class for a PDO object - it creates the database connection
-* a class for your data objects
+* A class for a <strong>PDO object</strong><br>It handles the database connection, makes all queries. With it we log all database queries incl. debug information and logging.
+* a class for your <strong>data objects</strong><br>Per table with your items you create a class with table definitions and extends the base class. Then it inherits all CRUD functions.
 
-### Create your PDO to connect a database
+## Create PDO object
+
+First we need to create a PDO object to connect a database. 
+pdo-db.config.php
 
 ```php
 <?php
 require_once __DIR__.'/vendor/php-abstract-dbo/src/pdo-db.class.php';
 $oDB=new axelhahn\pdo_db([
-    'showdebug'=>true,
-    'showerrors'=>true,
+    'db'=><ARRAY>,
 ]);
-if (!$oDB->db){
-    echo $oDB->error().'<br>';
-    die("SORRY, unable to connect the database.");
-}
 ```
 
-Keys for the pdo_db constructor
-
-| Key                          | Type        | Description
-|---                           |:---:        |---
-| cfgfile                      | {string}    | set file with path to a config to create a PDO connection; default: ``pdo-db.config.php`` in the ./vendor/php-abstract-dbo/src/ directrory
-| showdebug                    | {bool}      | enable debugging
-| showerrors                   | {bool}      | enable to show any error
-
-#### Database connection config
-
-The config file contains the keys
-
-| Key                          | Type        | Description
-|---                           |:---:        |---
-| dsn                          | {string}    | a dsn; see also: https://www.php.net/manual/de/pdo.construct.php
-| user                         | {string}    | optional: username
-| password                     | {string}    | optional: password
-| options                      | {array}     | optional: initial database options
-
-
-```php
-return [
-    // see https://www.php.net/manual/de/pdo.construct.php
-    'dsn' => 'sqlite:'.__DIR__.'/../../../protected/data/my-example-app.sqlite3',
-    'user' =>'',
-    'password'=>'',
-    'options' => []
-];
-```
-
-### Create your object class
+## Create your object class
 
 This is a minimal example class "objexample" with 2 properties "label" and "description":
 

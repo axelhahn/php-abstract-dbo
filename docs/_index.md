@@ -1,24 +1,14 @@
+<html>
+<div class="hero">
+  <h2>Axels PDO-DB class</h2>
+  Abstracts CRUD actions to simplify the handling of items of a custom object.<br>
+</div>
+</html>
 
-# create objects 
+<br>
 
 Free software and Open Source
 
-📄 Source:
+📄 Source: <https://github.com/axelhahn/php-abstract-dbo>\
 📜 License: GNU GPL 3.0 \
-📖 Docs: 
-
-- - -
-
-## About this class ##
-
-The main class abstracts CRUD actions to handle items of a custom object.
-It 
-
-* creates a database table per object; colums come from given properties during init
-* provides CRUD actions with the methods create() / read(ID) / update / delete()
-* save() automatically decides to use create() or update()
-* handles relations between objects
-* relations are stored in a separate table - so a relation can be seen from both sides
-* For debugging:
-  * you can access a list of messages/ warnings/ errors
-  * you can acces all executed queries with statement, count of results, needed time etc.
+📖 Docs: TODO (see the docs folder so far)

@@ -17,7 +17,7 @@
             "basepath": "https://git-repo.iml.unibe.ch/iml-open-source/docker-php-starterkit/tree/master/docs"
         },
         "links": {
-            "Git Repo": "https://github.com/axelhahn/php-abstract-dbo",
+            "Git Repo": "https://github.com/axelhahn/php-abstract-dbo"
         },
         "theme": "daux-blue",
         "search": true
