@@ -733,7 +733,7 @@ class pdo_db_base
     /**
      * create a relation from the current item to an id of a target object
      * @param  string  $sToTable     target object
-     * @param  string  $sToId        target object
+     * @param  string  $sToId        id of target object
      * @param  string  $sFromColumn  optional: source column
      * @return bool
      */
@@ -870,7 +870,7 @@ class pdo_db_base
 
     /**
      * get relations of the current item
-     * @param  array  $aFilter  optional: filter existing relaions by table and column
+     * @param  array  $aFilter  optional: filter existing relations by table and column
      *                          Keys:
      *                            table => <TARGETTABLE>  table must match
      *                            column => <COLNAME>     column name must match too

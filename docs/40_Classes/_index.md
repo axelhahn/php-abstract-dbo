@@ -35,11 +35,11 @@
 | <br>CRUD
 | $o->create()                | {bool}    | store a newly created item into database
 | $o->read(ID,[FLAG])         | {bool}    | read attribute with ID from database; you can read relations or use relRead() later
-| $o->update()                | {bool}    | updare an existnig item in the database
+| $o->update()                | {bool}    | update an existing item in the database
 | $o->delete()                | {bool}    | delete current item in the database
 | $o->delete(ID)              | {bool}    | delete item with given ID in the database
 | <br>RELATIONS
-| $o->relCreate(TABLE, ID)    | {bool}    | create a relation between current item and an id to another table
+| $o->relCreate(TABLE, ID)    | {bool}    | create a relation between current item and an id of another table
 | $o->relRead(FILTER)         | {array}   | get relations of the current item; FILTER is an optional array with keys "table" and optional "column"
 | $o->relDelete(RELID)        | {bool}    | delete a single relation of the current item 
 | $o->relDeleteAll()          | {bool}    | delete all relation of the current item 
