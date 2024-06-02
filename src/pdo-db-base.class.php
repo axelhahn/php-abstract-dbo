@@ -1453,7 +1453,7 @@ class pdo_db_base
      * - validate a field if validate_regex set regex
      * Opposite function of get()
      * @param  string  $sKey2Set  key of your object to set
-     * @param  mixed     $value     new value to set
+     * @param  mixed   $value     new value to set
      * @return bool
      */
     public function set(string $sKey2Set, mixed $value) :bool
@@ -1524,13 +1524,14 @@ class pdo_db_base
      */
     public function setItem(array $aNewValues) :bool
     {
+        $bReturn = true;
         foreach (array_keys($aNewValues) as $sKey) {
             if (!isset($this->_aDefaultColumns[$sKey])) {
-                $this->set($sKey, $aNewValues[$sKey]);
+                $bReturn=$bReturn && $this->set($sKey, $aNewValues[$sKey]);
             }
         }
         // return $this->save();
-        return true;
+        return $bReturn;
     }
 }
 
