@@ -271,19 +271,103 @@ A filter can limit the relations to a given table and an optional column.
 
 Array
 
+### relUpdate()
+
+Update a single relation from current item - set another id of the currently connected object.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | key of the relation; a string like 'table:id'
+| 2   | {integer}   | new id to on target db
+
+🟢 **Return**
+
+Bool
+
+* true - success. The relation was updated.
+* false
+  * if given relation key does not exist
+  * update of relation failed
+
 ### relDelete()
 
-| $o->relDelete(RELID)        | {bool}    | delete a single relation of the current item 
+Delete a single relation from current item.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | key of the relation; a string like 'table:id'
+
+🟢 **Return**
+
+Bool
+
+* true - success. The relation was deleted.
+* false
+  * if given relation key does not exist
+  * deletion of relation failed
 
 ### relDeleteAll()
-| $o->relDeleteAll(ID)        | {bool}    | delete all relation of given item 
-| $o->relDeleteAll(ID)        | {bool}    | delete all relation of given item 
+
+Delete all relations of a single item. Without parameter it deletes all relations of the current item. Given an integer to delete relations of another item of the same object type.
+
+It is called by delete(ID) before deleting the item itself.
+
+!!! danger Danger
+    This function is function you should use with caution!
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {integer}   | if of an item; default: false (=current item)
+
+🟢 **Return**
+
+Bool.
+
+* true - success.
+  * the object has no relations
+  * deletion of all relations were done
+* false
+  * deletion of a relation failed
+
+### relFlush()
+
+Delete all relations of all objects of the current object type(!).
+Called by flush() before deleting all items of a type.
+
+!!! danger Danger
+    This function is function you should use with caution!
+    It is useful if you really want to delete all objects of the current type.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {integer}   | if of an item; default: false (=current item)
+
+🟢 **Return**
+
+Bool.
+
+* true - deletion was done
+* false - min. one deletion query failed
 
 ### getRelLabel(COLUMN)
+
+
 | $o->getRelLabel(COLUMN)     | {string}  | for 1:1 lookups: get the label of the item in the related lookup table
 
 ## MORE DATABASE
 ### flush()
+
+!!! danger Danger
+    This function is function you should use with caution!
+
 | $o->flush()                 | {bool}    | DANGEROUS: delete all items of the current object type by dropping its table
 
 ### save()

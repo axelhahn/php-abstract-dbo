@@ -41,6 +41,7 @@
 | <br>RELATIONS
 | $o->relCreate(TABLE, ID)    | {bool}    | create a relation between current item and an id of another table
 | $o->relRead(FILTER)         | {array}   | get relations of the current item; FILTER is an optional array with keys "table" and optional "column"
+| $o->relUpdate(RELID, ID)    | {bool}    | Update a single relation from current item - set another id of the currently connected object.
 | $o->relDelete(RELID)        | {bool}    | delete a single relation of the current item 
 | $o->relDeleteAll()          | {bool}    | delete all relation of the current item 
 | $o->relDeleteAll(ID)        | {bool}    | delete all relation of given item 
