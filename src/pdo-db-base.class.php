@@ -1034,16 +1034,6 @@ class pdo_db_base
     }
 
     /**
-     * Get id of the current item as integer
-     * it returns false if there is no id
-     * @return int|bool
-     */
-    public function id(): int|bool
-    {
-        return (int) $this->_aItem['id'] ? (int) $this->_aItem['id'] : false;
-    }
-
-    /**
      * Get a single property of an item.
      * opposite function of set(KEY, VALUE)
      * @param  string  $sKey2Get  key of your object to set
@@ -1391,6 +1381,16 @@ class pdo_db_base
     public function hasChange(): bool
     {
         return $this->_bChanged;
+    }
+
+    /**
+     * Get id of the current item as integer
+     * it returns false if there is no id
+     * @return int|bool
+     */
+    public function id(): int|bool
+    {
+        return (int) $this->_aItem['id'] ? (int) $this->_aItem['id'] : false;
     }
 
     /**

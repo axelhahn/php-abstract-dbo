@@ -359,30 +359,122 @@ Bool.
 
 ### getRelLabel(COLUMN)
 
+For 1:1 lookups: get the label of the related item by a given column.
+It fetches the current value of the column and returns the label of the connected item of the lookup table
 
-| $o->getRelLabel(COLUMN)     | {string}  | for 1:1 lookups: get the label of the item in the related lookup table
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | name of the lookup column
+
+🟢 **Return**
+
+String.
 
 ## MORE DATABASE
+
 ### flush()
 
 !!! danger Danger
     This function is function you should use with caution!
 
-| $o->flush()                 | {bool}    | DANGEROUS: delete all items of the current object type by dropping its table
+Drop table of current object type. It deletes all items of a type and removes the schema from database
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Boolean.
+
+* true - success: the table was flushed
+* false - failed
+  * a relation was not deleted
+  * drop table failed
 
 ### save()
-| $o->save()                  | {bool}    | selects automatically create() or update() to store an item
+
+Save item. If id is set, update. Otherwise create.
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Boolean. Result of create() or update().
 
 ### search()
-| $o->search(ARRAY)           | {array}   | search in objects
+
+Search for items in the current table.
+You should use ":<placeholder>" in your sql statements to use prepared statements
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {array}     | array with search options<br>- columns - array\|string<br>- where   - array\|string<br>- order   - array\|string<br>- limit   - string<br>
+| 2   | {array}     | array with values for prepared statement
+
+🟢 **Return**
+
+Boolean|array.
+
+✏️ **Example**
+
+A search with all search options in param 1:
+
+```php
+$aData=$o->search([
+    'columns'=>'*',
+    'where'=>["label like 'test2%' "],
+    'order'=>[
+        'label ASC',
+        'timecreated ASC'
+    ],
+    'limit'=>'0,3'
+]);
+```
+
+Get data with basic attributes of the current object type:
+
+```php
+$aBasicAttributes = $o->getBasicAttributes();
+$aItems = $o->search(['columns'=>$aBasicAttributes]);
+```
 
 ## INFOS
 
 ### count()
-| $o->count()                 | {integer} | get count of existing items for the current item type
+
+Get count of existing items in current object type.
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Integer.
 
 ### getAttributes()
-| $o->getAttributes()         | {array}   | get list of attributes
+
+Get array of attribute names.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {bool}      | flag: including values? default: false
+
+🟢 **Return**
+
+Array.
+
+* Array with list of properties
+* Hash with key - value data of attributes
 
 ### getDescriptionline()
 | $o->getDescriptionline()    | {string}  | get name string built from main columns
