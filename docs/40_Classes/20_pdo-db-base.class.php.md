@@ -64,7 +64,7 @@ bool: true
 * set(KEY, VALUE) - set a single property
 * create() - store new item into database
 
-## get(KEY)
+### get(KEY)
 
 Get a single property of the current item.
 After read(ID) you can read the value.
@@ -477,24 +477,143 @@ Array.
 * Hash with key - value data of attributes
 
 ### getDescriptionline()
-| $o->getDescriptionline()    | {string}  | get name string built from main columns
+
+Get a single line for a database row description.
+
+It fetches the basic attributes of the item and creates a single line string with values of the item, separated by dashes.
+If the item has no data, it returns false.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {array}     | optional: item data; default: current item
+
+🟢 **Return**
+
+Bool|String.
 
 ### getLabel()
-| $o->getLabel()              | {string}  | get name string built from first of main columns (eg. label)
+
+Get a label for the item.
+It fetches the basic attributes if needed. Alternatively it uses the id.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {array}     | optional: item data; default: current item
+| 2   | {array}     | optional: array of columns to show; default: basic attributes
+
+🟢 **Return**
+
+Bool|String.
 
 ### getTable()
-| $o->getTable()              | {string}  | get name of database table for current object
+
+Get the database tablename for the current object type.
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+String.
 
 ### hasChange()
-| $o->hasChange()             | {bool}    | check if the current item was changed after applying set() or setItem()
+
+Get bool if the current dataset item was changed.
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Bool.
+
+* true - one of the properties was changed
+* false - no change
 
 ### id()
-| $o->id()                    | {integer} | get id of current item
+
+Get id of the current item as integer.
+It returns false if there is no id.
+
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Bool|Integer.
 
 ### verifyColumns()
-| $o->verifyColumns()         | {array}   | verify object definitions with created databse columns
+
+Verify database columns with current object configuration. It shows
+
+* missing columns
+* existing database columns that are not configured
+* columns with wrong type
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Bool|Array.
+
+TODO: example output
 
 ## FORMS
-### getFormtype(KEY)
-| $o->getFormtype(KEY)        | {string}  | get count of existing items for the current item type
 
+### getFormtype(KEY)
+
+Return or guess the form type of a given attribute.
+
+This method is for rendering the form field of an object admin. The focus is on usage of AdminTE in <https://github.com/axelhahn/axelOM>.
+
+If `$this->_aProperties[$sAttr]['attr']` was defined then these html properties will be applied.
+
+Then: If `$this->_aProperties[$sAttr]['force']` was defined then it returns that value.
+Otherwise the type will be guessed based on the attribute name or create statement.
+
+If the property is an integer and you set a lookup to an object:
+
+* A select box will be created
+* options will be fetched from given target object
+* with "bootstrap-select" you can create a select box that can be filtered (using the "bootstrap-select" plugin)
+
+Otherwise: Guess behaviour by create statement
+
+* int|integer -> input type integer
+* text -> textarea
+* varchar -> input type text; maxsize is size of varchar
+* varchar with more than 1024 byte -> textarea
+
+If attribute starts with 
+
+* "date"     -> input with type date
+* "datetime" -> input with type datetime-local
+* "html"     -> textarea with type "html"
+* "number"   -> textarea with type "number"
+
+The return value is an array with form attributes to be rendered and a key "debug" with explainations why the decision was made and how.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | name of the property
+
+🟢 **Return**
+
+Bool|Array.
+
+* false - the property does not exist
+* array with keys "debug" + "tag" and html attributes
+
+TODO: here is a lot of magic. We need some examples - or set a reference to to docs of axel:OM.

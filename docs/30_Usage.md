@@ -87,7 +87,7 @@ $o=new axelhahn\objexample($oDB);
 
 Variant 1:
 
-With the method "set(PROPERTY, VALUE)" you can modify the current value of a single property.
+With the method `set(PROPERTY, VALUE)` you can modify the current value of a single property.
 The method save() detects if the current item is new or not and executes create() or update().
 
 ```php
@@ -97,6 +97,8 @@ $o->new();
 // set values
 $o->set('label', 'test'.($iCount+1));
 $o->set('description', 'test object #'.($iCount+1));
+
+// store to database
 $o->save();
 ```
 
@@ -128,7 +130,11 @@ Array
 
 $aItem['label']='test'.($iCount+1);
 $aItem['description']='test object #'.($iCount+1);
+
 $o->setItem($aItem);
+
+// store to database
+$o->save();
 ```
 
 ### Read an item

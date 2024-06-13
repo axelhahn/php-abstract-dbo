@@ -1086,7 +1086,7 @@ class pdo_db_base
      * with values of the item, separated by dashes.
      * If the item has no data, it returns false.
      *
-     * @param  array  $aItem  item data; default: current item
+     * @param  array  $aItem  optional: item data; default: current item
      * @return bool|string
      */
     public function getDescriptionLine(array $aItem = []): bool|string
@@ -1114,8 +1114,8 @@ class pdo_db_base
      * It fetches the basic attributes if needed. 
      * Alternatively it uses the id
      * 
-     * @param  array  $aItem     item data; default: current item
-     * @param  array  $aColumns  array of columns to show
+     * @param  array  $aItem     optional: item data; default: current item
+     * @param  array  $aColumns  optional: array of columns to show; default: basic attributes
      * @return mixed bool|string
      */
     public function getLabel(array $aItem = [], array $aColumns = []): string
@@ -1195,7 +1195,7 @@ class pdo_db_base
 
     /**
      * Return or guess the form type of a given attribute
-     * If $this->_aProperties[$sAttr]['form'] was defined then it returns that value.
+     * If $this->_aProperties[$sAttr]['force'] was defined then it returns that value.
      * Otherwise the type will be guessed based on the attribute name or create statement.
      * 
      * Guess behaviour by create statement
@@ -1266,7 +1266,6 @@ class pdo_db_base
                 $aLookupdata = $this->makeQuery($sSql);
                 $aReturn['tag'] = 'select';
                 $aReturn['bootstrap-select'] = isset($aLookup['bootstrap-select']) ? $aLookup['bootstrap-select'] : false;
-
 
                 unset($aReturn['type']);
                 $aReturn['size'] = isset($aLookup['size']) && (int) $aLookup['size'] ? (int) $aLookup['size'] : 1;
