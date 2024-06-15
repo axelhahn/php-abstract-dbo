@@ -10,7 +10,7 @@ There are 2 abstract classes:
 ## Create PDO object
 
 First we need to create a PDO object to connect a database. 
-pdo-db.config.php
+Define a database connection for a set of objects in the file `pdo-db.config.php`.
 
 ```php
 <?php

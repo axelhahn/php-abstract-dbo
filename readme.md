@@ -4,6 +4,7 @@ Abstracts CRUD actions to simplify the handling of items of a custom object.
 
 Free software and Open Source
 
-📄 Source: <https://github.com/axelhahn/php-abstract-dbo>\
+👤 Author: Axel Hahn \
+📄 Source: <https://github.com/axelhahn/php-abstract-dbo> \
 📜 License: GNU GPL 3.0 \
-📖 Docs: TODO (see the docs folder so far)
+📗 Docs: <https://www.axel-hahn.de/docs/php-abstract-dbo/>
