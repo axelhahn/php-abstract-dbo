@@ -60,9 +60,9 @@ bool: true
 
 👉 **See also**
 
-* getItem() - to get the current item as array
-* set(KEY, VALUE) - set a single property
-* create() - store new item into database
+* `getItem()` - to get the current item as array
+* `set(KEY, VALUE)` - set a single property
+* `create()` - store new item into database
 
 ### get(KEY)
 
@@ -140,8 +140,8 @@ bool: true
 
 👉 **See also**
 
-`getItem()` - get the current item as array \
-`set()` - set a single property
+* `getItem()` - get the current item as array \
+* `set(KEY, VALUE)` - set a single property
 
 ## CRUD
 
@@ -164,11 +164,14 @@ bool: true
 
 You need to create the item first and set its properties.
 
-`new()` - get the current item as array \
-`set()` - set a single property \
-or \
-`getItem()` - get the current item as array \
-`setItem()` - set an item from array
+* `new()` - get the current item as array
+
+Followed by
+
+* `set(KEY, VALUE)` - set a single property 
+or
+* `getItem()` - get the current item as array
+* `setItem(ARRAY)` - set an item from array
 
 ### read()
 
