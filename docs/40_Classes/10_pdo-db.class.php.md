@@ -67,9 +67,9 @@ return [
 
 👉 **See also**
 
-* setDatabase() - initialize a database connection
-* setDebug() - enable/ disable debug output
-* showErrors() - enable/ disable showing errors
+* `setDatabase(ARRAY)` - initialize a database connection
+* `setDebug(BOOL)` - enable/ disable debug output
+* `showErrors(BOOL)` - enable/ disable showing errors
 
 ### setDatabase()
 
@@ -189,8 +189,8 @@ It returns
 
 👉 **See also**
 
-`lastquery()` - get the last query only
-`query()` - get an array of all queries
+* `lastquery()` - get the last query only
+* `query()` - get an array of all queries
 
 !!! info "Hint"
     For security reasons you should set placeholders `:<field>` in the sql query.<br>
@@ -243,8 +243,8 @@ It returns
 
 👉 **See also**
 
-`import()` - get the last query only<br>
-`error()` - get the last error
+* `import(FILE)` - get the last query only<br>
+* `error()` - get the last error
 
 ### import()
 
@@ -280,15 +280,15 @@ It returns
 
 👉 **See also**
 
-`dump()` - get the last query only<br>
-`error()` - get the last error
+* `dump()` - get the last query only<br>
+* `error()` - get the last error
 
 Scenario - Repair a single table:
 
-* use dump(<FILE>, [<TABLE>])
+* use `dump(<FILE>, [<TABLE>])`
 * drop the affected table.
 * initialize the object with its new column options
-* use import(<FILE>). The table now already exists. All data will be imported. This works well if you extend the size of a varchar or add a new column in your object.
+* use `import(<FILE>)`. The table now already exists. All data will be imported. This works well if you extend the size of a varchar or add a new column in your object.
 
 
 ## Debugging
@@ -412,7 +412,7 @@ You get
 
 👉 **See also**
 
-`queries()` - get a list of all queries
+* `queries()` - get a list of all queries
 
 ### logs()
 
@@ -472,4 +472,4 @@ You get an array with these keys:
 
 👉 **See also**
 
-`lastquery()` - get the last query only
+* `lastquery()` - get the last query only
