@@ -36,7 +36,7 @@ class objexample extends pdo_db_base{
      * create database column, draw edit form
      * @var array 
      */
-    protected $_aProperties = [
+    protected array $_aProperties = [
         'label'       => ['create' => 'TEXT',],
         'description' => ['create' => 'TEXT',],
     ];

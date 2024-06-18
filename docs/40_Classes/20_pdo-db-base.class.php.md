@@ -140,8 +140,8 @@ bool: true
 
 👉 **See also**
 
-`getItem()` - get the current item as array
-`set()` - get the current item as array
+`getItem()` - get the current item as array \
+`set()` - set a single property
 
 ## CRUD
 
@@ -159,6 +159,16 @@ None.
 bool|integer false on failure or new id on success
 
 bool: true
+
+👉 **See also**
+
+You need to create the item first and set its properties.
+
+`new()` - get the current item as array \
+`set()` - set a single property \
+or \
+`getItem()` - get the current item as array \
+`setItem()` - set an item from array
 
 ### read()
 
@@ -316,7 +326,7 @@ Delete all relations of a single item. Without parameter it deletes all relation
 
 It is called by delete(ID) before deleting the item itself.
 
-!!! danger Danger
+!!! danger "Danger"
     This function is function you should use with caution!
 
 🔷 **Parameters**
@@ -340,7 +350,7 @@ Bool.
 Delete all relations of all objects of the current object type(!).
 Called by flush() before deleting all items of a type.
 
-!!! danger Danger
+!!! danger "Danger"
     This function is function you should use with caution!
     It is useful if you really want to delete all objects of the current type.
 
@@ -376,7 +386,7 @@ String.
 
 ### flush()
 
-!!! danger Danger
+!!! danger "Danger"
     This function is function you should use with caution!
 
 Drop table of current object type. It deletes all items of a type and removes the schema from database

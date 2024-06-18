@@ -1,7 +1,7 @@
 /*
 
     patch css elements of daux.io blue theme
-    version 2024-04-01
+    version 2024-06-18
 
 */
 
@@ -201,6 +201,8 @@ div.hero p.center{text-align: center;}
 .TableOfContentsContainer{
     background-color: var(--axel_bg-toc);
     padding: 0.5em;
+    max-height: 95%;
+    overflow: auto;
 }
 
 .s-content .TableOfContentsContainer h4{
@@ -216,7 +218,6 @@ div.hero p.center{text-align: center;}
 .TableOfContentsContainer__content {
 	border-width: 1px;
 	font-size: 0.5em;
-
 }
 ul.TableOfContents ul{
 	list-style-type: none;
