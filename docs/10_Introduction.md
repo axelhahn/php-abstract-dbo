@@ -9,12 +9,10 @@ Like that:
 ```php
 $o->new();
 
-// set properties
-$o->set('label', 'my label');
+$o->set('label', 'my label'); // set properties
 $o->set('description', 'This is a nice description.');
 
-// store to database
-$o->save();
+$o->save(); // store to database
 ```
 
 All needed database actions are handled in a base class. All objects just extend it.
@@ -33,10 +31,13 @@ This is the result of this project:
 
 ```mermaid
 flowchart TD
-    A(database class) --- B(class with abstract object actions)
-    B --> C1[your object 1]
-    B --> C2[your object 2]
-    B --> C3[your object N]
-    B --> D[Relations]
+    A(database class):::orange --- B(class with abstract object actions):::orange
+    B -..- |extends| C1[your object 1]:::gray
+    B -..- |extends| C2[your object 2]:::gray
+    B -..- |extends| C3[your object N]:::gray
+    B -.-  |extends| D[Relations]:::orange
+
+    classDef orange fill:#ec8,stroke:#a92
+    classDef gray fill:#eee,stroke:#aaa
 ```
 

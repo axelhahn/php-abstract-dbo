@@ -193,9 +193,9 @@ It returns
 * `query()` - get an array of all queries
 
 !!! info "Hint"
-    For security reasons you should set placeholders `:<field>` in the sql query.<br>
-    In the 2nd parameter send an array `[ "<field>" => $value ]`.<br>
-    This enables the usage of prepared statements and helps to prevent sql injections.
+    For security reasons you should set placeholders `:<field>` in the sql query.
+    In the 2nd parameter send an array `[ "<field>" => $value ]`.
+    This enables the usage of prepared statements and helps to  prevent sql injections.
 
 **Example**
 
@@ -320,15 +320,16 @@ true.
 
 ### showErrors()
 
-If an error occurs you automatically can display the error message and details.
-In your development environment You can enable debugging while initializing the database object with the subkey `showerrors`.
+If an error occurs you automatically can display the error message and details. This is a helper feature for development environment only. 
 
-During runtime you can use to enable or disable the debug output.
+You can enable debugging globally while initializing the database object with the subkey `showerrors`.
+
+During runtime you can use to enable or disable the debug output with showErrors().
 
 After enbabling it and an error occurs you see messages with red text on yellow background between your own output.
 
 !!! warning "Warning"
-    An error can show details of your database.<br>
+    An error can show details of your database.
     In production environments set it to false only!
 
 Hint:
@@ -392,7 +393,7 @@ $aLastErrorQuery = $oDB->lastquery(true);
 
 | #   | Type        | Description
 |:---:|:---:        |---
-| 1   | {bool}      | Flag: return query for last error or latest query? true = last error
+| 1   | {bool}      | Flag: return query for last error or latest query? true = last error; default: false = latest query
 
 🟢 **Return**
 
@@ -472,4 +473,4 @@ You get an array with these keys:
 
 👉 **See also**
 
-* `lastquery()` - get the last query only
+* `lastquery()` - get the last query or last failed query only
