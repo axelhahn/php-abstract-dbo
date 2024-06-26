@@ -1245,7 +1245,7 @@ class pdo_db_base
             if (isset($this->_aProperties[$sAttr]['lookup'])) {
                 $aReturn['debug']['_force_lookup'] = 1;
                 $aLookup = $this->_aProperties[$sAttr]['lookup'];
-                // WIP
+
                 /*
                 'lookup'=> [
                     'table'=>'objusers',           // which table to connect
@@ -1257,9 +1257,10 @@ class pdo_db_base
                 ]
                 */
 
-                $sSql = 'SELECT id,' . implode(',', $aLookup['columns'])
+                $sSql = 'SELECT ' . implode(',', $aLookup['columns']).', '.implode(',', $aLookup['value'])
                     . ' FROM ' . $aLookup['table']
                     . (isset($aLookup['where']) && $aLookup['where'] ? ' WHERE ' . $aLookup['where'] : '')
+                    .' ORDER BY ' . implode(' ASC ,', $aLookup['columns']).' ASC'
                     . ''
                 ;
                 // echo "DEBUG: sSql = $sSql<br>";
