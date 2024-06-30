@@ -270,7 +270,7 @@ bool
 
 ### relRead()
 
-Get an array of the relations of the current object to other elements.
+Get an array of the relations of the current object to other objects.
 Without filter you get all relations. 
 A filter can limit the relations to a given table and an optional column.
 
@@ -278,7 +278,7 @@ A filter can limit the relations to a given table and an optional column.
 
 | #   | Type        | Description
 |:---:|:---:        |---
-| 1   | {array}     | optional: filter existing relations by table and column<br>Keys:<br>- table => <TARGETTABLE>  table must match<br>- column => <COLNAME>     column name must match too
+| 1   | {array}     | optional: filter existing relations by table and column<br>Keys:<br>- "table" => &lt;TARGETTABLE&gt; - table must match<br>- "column" => &lt;COLNAME&gt; - column name must match too
 
 🟢 **Return**
 
@@ -304,6 +304,10 @@ Bool
   * if given relation key does not exist
   * update of relation failed
 
+👉 **See also**
+
+* `relRead()` - get the relatins for the current item. The array keys you need to update or delete an existing relation
+
 ### relDelete()
 
 Delete a single relation from current item.
@@ -322,6 +326,10 @@ Bool
 * false
   * if given relation key does not exist
   * deletion of relation failed
+
+👉 **See also**
+
+* `relRead()` - get the relatins for the current item. The array keys you need to update or delete an existing relation
 
 ### relDeleteAll()
 
@@ -373,7 +381,7 @@ Bool.
 ### getRelLabel(COLUMN)
 
 For 1:1 lookups: get the label of the related item by a given column.
-It fetches the current value of the column and returns the label of the connected item of the lookup table
+It fetches the current value of the column and returns the label of the connected item of the lookup table.
 
 🔷 **Parameters**
 
@@ -384,6 +392,31 @@ It fetches the current value of the column and returns the label of the connecte
 🟢 **Return**
 
 String.
+
+**Example:**
+
+If you have an object for products and licenses you can get the label of the license by the id of the product.
+
+```txt
+
++--------------------------------+
+| product                        |
++--------------------------------+
+| id       int                   |
+| label    string                |          +--------------------------------+
+| license  int (lookup)          +----+     | licenses                       |
+| ...                            |    |     +--------------------------------+
++--------------------------------+    +---->| id       int                   |      
+                                            | label    string                |
+                                            | ...                            |
+                                            +--------------------------------+
+```
+
+```php
+$oProduct->read(12);
+echo $oProduct->relLabel('license'); // returns the license label eg. 'GNU GPL3'
+```
+
 
 ## MORE DATABASE
 

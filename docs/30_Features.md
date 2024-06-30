@@ -2,8 +2,8 @@ The main class abstracts CRUD actions to handle items of a custom object.
 
 ## Objects
 
-* creates a database table per object; colums come from given properties during init
-* provides CRUD actions with the methods create() / read(ID) / update / delete() - you don't need to handle sql.
+* creates a database table per object automatically when using it; colums come from given properties during init
+* provides CRUD actions with the methods create() / read(ID) / update / delete() - you don't need to handle sql for your custom objects.
 * save() automatically decides to use create() or update()
 
 ## Relations
@@ -11,7 +11,7 @@ The main class abstracts CRUD actions to handle items of a custom object.
 * handles relations between objects
 * N:M relations are stored in a separate table - a relation can be seen from both sides
 
-## Debugging
+## Logging / debugging
 
 * you can access a list of messages/ warnings/ errors
 * you can acces all executed queries with statement, affected rows, needed time etc.
