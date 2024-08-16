@@ -13,6 +13,7 @@
 | $oDB->makeQuery(SQL, DATA, TABLE) | {array}   | Execute a given query and add metadata to log
 | $oDB->dump()                | {bool}    | get an array of all tables and their rows
 | $oDB->import()              | {bool}    | import a given export file
+| $oDB->optimize()            | {array}   | optimize database; its actions depend on the database type
 | <br>**DEBUG SETTNGS**<br><br>
 | $oDB->setDebug(BOOL)        | {bool}    | enable/ disable debugging
 | $oDB->showErrors(BOOL)      | {bool}    | enable/ disable showing errors

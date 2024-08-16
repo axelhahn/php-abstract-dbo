@@ -291,6 +291,30 @@ Scenario - Repair a single table:
 * use `import(<FILE>)`. The table now already exists. All data will be imported. This works well if you extend the size of a varchar or add a new column in your object.
 
 
+### optimize()
+
+This method optimizes the database. In dependency of the database type can be performed a list of queries per database and/ or a list of queries per table.
+
+You should implement this method in a backend for admins only.
+
+```php
+$aData=$oDB->optimize();
+```
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+It returns
+
+* array with results
+* false - on error
+  * no databses was set
+  * file does not exist
+  * file is no valid json
+
 ## Debugging
 
 ### setDebug()
