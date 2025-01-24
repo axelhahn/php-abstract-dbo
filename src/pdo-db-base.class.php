@@ -19,9 +19,9 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
+ * 2025-01-25  ___  ah  last changes
  * ======================================================================
  */
-
 
 namespace axelhahn;
 
@@ -62,7 +62,6 @@ class pdo_db_base
      * @var bool
      */
     protected bool $_bChanged = false;
-
 
     /**
      * hash for a single announcement item with related data to
@@ -937,13 +936,14 @@ class pdo_db_base
         }
 
         if (
-            is_array($this->makeQuery(
-                'UPDATE `pdo_db_relations` SET to_id = :to_id WHERE id = :id',
-                [
-                    'id' => $this->_aRelations['_targets'][$sRelKey]['_relid'],
-                    'to_id' => $iItemvalue,
-                ]
-            )
+            is_array(
+                $this->makeQuery(
+                    'UPDATE `pdo_db_relations` SET to_id = :to_id WHERE id = :id',
+                    [
+                        'id' => $this->_aRelations['_targets'][$sRelKey]['_relid'],
+                        'to_id' => $iItemvalue,
+                    ]
+                )
             )
         ) {
             return true;
@@ -1249,11 +1249,11 @@ class pdo_db_base
                 $aLookup = $this->_aProperties[$sAttr]['lookup'];
 
                 // verify lookup data
-                if(!isset($aLookup['columns'])) {
-                    $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '(' . $sAttr . ')', 'No key [columns] in lookup for object key '.$sAttr.' to define labels for dropdown.<br>Suggestion: add<br>"columns" => "label"');
-                    return false;                            
+                if (!isset($aLookup['columns'])) {
+                    $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '(' . $sAttr . ')', 'No key [columns] in lookup for object key ' . $sAttr . ' to define labels for dropdown.<br>Suggestion: add<br>"columns" => "label"');
+                    return false;
                 }
-                if(!isset($aLookup['value'])) {
+                if (!isset($aLookup['value'])) {
                     $aLookup['value'] = 'id';
                     // $this->_log(PB_LOGLEVEL_ERROR, __METHOD__ . '(' . $sAttr . ')', 'No key [value] in lookup for object key '.$sAttr.' to define values for dropdown.<br>Suggestion: add<br>"value" => "id"<br>in<pre>'.print_r($aLookup, 1).'</pre>');
                     // return false;                            
@@ -1270,10 +1270,10 @@ class pdo_db_base
                 ]
                 */
 
-                $sSql = 'SELECT ' . implode(',', $aLookup['columns']).', '.$aLookup['value']
+                $sSql = 'SELECT ' . implode(',', $aLookup['columns']) . ', ' . $aLookup['value']
                     . ' FROM ' . $aLookup['table']
                     . (isset($aLookup['where']) && $aLookup['where'] ? ' WHERE ' . $aLookup['where'] : '')
-                    .' ORDER BY ' . implode(' ASC ,', $aLookup['columns']).' ASC'
+                    . ' ORDER BY ' . implode(' ASC ,', $aLookup['columns']) . ' ASC'
                     . ''
                 ;
                 // echo "DEBUG: sSql = $sSql<br>";
@@ -1576,13 +1576,13 @@ class pdo_db_base
         foreach (array_keys($aNewValues) as $sKey) {
             if (!isset($this->_aDefaultColumns[$sKey])) {
 
-                $bDoSet=true;
-                if($aNewValues[$sKey]===false){
-                    if (!preg_match('/(text|char)/i', $this->_aProperties[$sKey]['create'])){
-                        $bDoSet=false;
+                $bDoSet = true;
+                if ($aNewValues[$sKey] === false) {
+                    if (!preg_match('/(text|char)/i', $this->_aProperties[$sKey]['create'])) {
+                        $bDoSet = false;
                     }
                 }
-                if($bDoSet){
+                if ($bDoSet) {
                     $bReturn = $bReturn && $this->set($sKey, $aNewValues[$sKey]);
                 }
             }
