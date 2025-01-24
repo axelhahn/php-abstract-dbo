@@ -464,8 +464,8 @@ Boolean. Result of create() or update().
 
 ### search()
 
-Search for items in the current table.
-You should use ":<placeholder>" in your sql statements to use prepared statements
+Search for items in the current object table.
+You should use `:<placeholder>` in your sql statements to use prepared statements
 
 🔷 **Parameters**
 
@@ -474,26 +474,43 @@ You should use ":<placeholder>" in your sql statements to use prepared statement
 | 1   | {array}     | array with search options<br>- columns - array\|string<br>- where   - array\|string<br>- order   - array\|string<br>- limit   - string<br>
 | 2   | {array}     | array with values for prepared statement
 
+Known keys in search options:
+
+| key      | Type            | Description
+|:---:     |:---:            |---
+| columns  | {array\|string} | array: list of columns to return, eg `['id', 'label']`<br>string: single column`"id"` or `"*"`<br>defefault (no value): `"*"`
+| where    | {array\|string} | array: list of where conditions with AND, eg `['id=12', 'label like "test%"]`<br>string: complete  where condition without WHERE keyword, eg `label like 'test%'"`
+| order    | {array\|string} | array: list of order conditions with AND, eg `['id ASC', 'label DESC']`<br>string: complete order condition including ORDER keyword, eg `"order id ASC"`
+| limit    | {string}        | limit of results, eg `"0,10"`
+
 🟢 **Return**
 
 Boolean|array.
 
 ✏️ **Example**
 
+(1)
 A search with all search options in param 1:
 
 ```php
-$aData=$o->search([
-    'columns'=>'*',
-    'where'=>["label like 'test2%' "],
-    'order'=>[
+$aData=$o->search(
+  [
+    'columns' => ['id', 'label', 'descxription'],
+    'where'   => ["label like :label"], // remark: ":label" is a placeholder - see 2nd param
+    'order'   => [
         'label ASC',
         'timecreated ASC'
     ],
-    'limit'=>'0,3'
-]);
+    'limit'   => '0,10'
+  ],
+  [
+    // array with values for placeholders
+    'label' => 'something%'
+  ]
+);
 ```
 
+(2)
 Get data with basic attributes of the current object type:
 
 ```php
@@ -532,11 +549,63 @@ Array.
 * Array with list of properties
 * Hash with key - value data of attributes
 
+### getBasicAttributes()
+
+Get array of main attributes to show in overview or to select a relation.
+
+If you have an object wit $_aProperties set, it will return an array with the keys `"overview" => true` to identify the main attributes.
+
+🔷 **Parameters**
+
+None.
+
+🟢 **Return**
+
+Array of properties with overview flag true.
+
+✏️ **Example**
+
+If you define an objext with $_aProperties ...
+
+```php
+    protected array $_aProperties = [
+        'label'       => [
+            'create' => 'varchar(32)',
+            'validate_is'=>'string', 
+            'overview'=>1,             // <<<<<
+        ],
+        'version' => [
+            'create' => 'varchar(32)',
+            'validate_is'=>'string', 
+            'overview'=>1,             // <<<<<
+        ],
+        'product'=> [
+            'create' => 'integer',
+            'lookup'=> [
+                'table' => 'objproducts', 
+                'columns' => ['label'], 
+                'bootstrap-select' => true,
+            ]
+        ],
+        'type'=> [
+            'create' => 'integer',
+            'lookup'=> [
+                'table' => 'objaddontypes', 
+                'columns' => ['label'], 
+                'bootstrap-select' => true,
+            ]
+        ],
+        ...
+    ];
+```
+
+... then getBasicAttributes() will return an array with `['label', 'version']` - those with a flag `overview` and value `true`.
+
 ### getDescriptionline()
 
 Get a single line for a database row description.
 
-It fetches the basic attributes of the item and creates a single line string with values of the item, separated by dashes.
+It fetches the basic attributes of the item (see `getBasicAttributes()`) and creates a single line string with values of the item, separated by dashes.
 If the item has no data, it returns false.
 
 🔷 **Parameters**
@@ -592,11 +661,26 @@ Bool.
 * true - one of the properties was changed
 * false - no change
 
+✏️ **Example**
+
+To give you a picture:
+
+```php
+  $o->read(4):
+  echo $o->hasChange(); // false
+
+  $o->set('label', 'new label');
+  if ($o->hasChange()){
+    $o->save();
+  }
+```
+
+If you have an importer script and you set a value from a foreign system ... with `$o->hasChange()` you can check if the item was changed. If not then you can skip a `save()` action to store the current value. This reduces actions on the database and makes your importer faster.
+
 ### id()
 
 Get id of the current item as integer.
 It returns false if there is no id.
-
 
 🔷 **Parameters**
 
