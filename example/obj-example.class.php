@@ -1,16 +1,16 @@
 <?php
-namespace axelhahn;
+// namespace axelhahn;
 
-require_once "../src/pdo-db-base.class.php";
+// require_once "../src/pdo-db-base.class.php";
 
-class objexample extends pdo_db_base{
+class objexample extends axelhahn\pdo_db_base{
 
     /**
      * hash for a table
      * create database column, draw edit form
      * @var array 
      */
-    protected $_aProperties = [
+    protected array $_aProperties = [
         // 'label'       => ['create' => 'TEXT',     'label' => 'Label',                 'descr' => '', 'type' => 'text',           'edit' => true, 'required' => true],
         // 'description' => ['create' => 'TEXT',     'label' => 'Beschreibung',          'descr' => '', 'type' => 'textarea',       'edit' => true],
         'label'       => ['create' => 'TEXT',],
