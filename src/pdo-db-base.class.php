@@ -1,5 +1,4 @@
 <?php
-
 /**
  * ======================================================================
  * 
@@ -1511,12 +1510,12 @@ class pdo_db_base
             $_bValError = false;
             $_bValOK = true;
 
-            $_bRequired=$this->_aProperties[$sKey2Set]['required']??false;
-            $_sValidate=$this->_aProperties[$sKey2Set]['validate_is']??false;
-            $_sCreate=strtolower($this->_aProperties[$sKey2Set]['create']);
+            $_bRequired = $this->_aProperties[$sKey2Set]['required'] ?? false;
+            $_sValidate = $this->_aProperties[$sKey2Set]['validate_is'] ?? false;
+            $_sCreate = strtolower($this->_aProperties[$sKey2Set]['create']);
 
             // empty values coming from forms -> set it to NULL
-            if($value===""){
+            if ($value === "") {
                 switch ($_sCreate) {
                     case 'date':
                     case 'datetime':
@@ -1525,35 +1524,39 @@ class pdo_db_base
                     case 'num':
                     case 'real':
                     case 'timestamp':
-                        $value=NULL;
-                        break;;
+                        $value = NULL;
+                        break;
+                        ;
                 }
             }
 
             // set a validation by given db type
             switch ($_sCreate) {
                 case 'date':
-                    $_sValidate=$_sValidate ?: 'date';
-                    break;;
+                    $_sValidate = $_sValidate ?: 'date';
+                    break;
+                    ;
 
                 case 'datetime':
                 case 'timestamp':
-                    $_sValidate=$_sValidate ?: 'datetime';
-                    break;;
+                    $_sValidate = $_sValidate ?: 'datetime';
+                    break;
+                    ;
 
                 case 'int':
                 case 'integer':
                 case 'num':
-                    $_sValidate=$_sValidate ?: 'integer';
-                    break;;
+                    $_sValidate = $_sValidate ?: 'integer';
+                    break;
+                    ;
             }
 
             // echo "-- validation for attribute '$sKey2Set' => '$value'<br>";
-            if($_bRequired && is_null($value)) {
+            if ($_bRequired && is_null($value)) {
                 $this->_log(PB_LOGLEVEL_ERROR, __METHOD__, "{$this->_table} value for $sKey2Set is reqired.");
                 return false;
             }
-            if($_bRequired || !is_null($value)) {
+            if ($_bRequired || !is_null($value)) {
 
                 if ($_sValidate) {
                     // echo "Check $sFunc($value) ... ";
@@ -1589,7 +1592,7 @@ class pdo_db_base
                     // echo "Skip 'validate_regex'<br>";
                 }
             }
-            
+
             // echo "--> OK: " .($_bValOK ? 'true':'false')." | Error: ".($_bValError ? 'true':'false')."<br>";
             if ($_bValOK && !$_bValError) {
                 // echo "SET<br>";
