@@ -153,6 +153,27 @@ bool: true
 * `getItem()` - get the current item as array \
 * `set(KEY, VALUE)` - set a single property
 
+### validate()
+
+Validate a column and a new value to set if it fullfills the requirements.
+It returns true if the value is valid.
+
+This function is called internally when using set() too.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | property to set
+| 2   | {mixed}     | new value
+
+🟢 **Return**
+
+bool
+
+* true - on success - value is valid
+* false - on failure.
+
 ## CRUD
 
 ### create()
@@ -193,6 +214,27 @@ You can use `getItem()` to get all properties and values as array.
 | #   | Type        | Description
 |:---:|:---:        |---
 | 1   | {integer}   | id of the item to read
+| 2   | {bool}      | flag: set to true to read relations too (or: use relRead() later)
+
+🟢 **Return**
+
+bool: 
+
+* true - success. The given id was found and the current item was set with data of the found row.
+* false - failed. The id was not found. The current item is empty (like after new())
+
+### readByFields()
+
+The `id`columns is an internal column. But sometimes you create columns in your object which are uniq too. Or an AND combination of multiple columns is uniq. Then this method comes into play.
+
+Read a database row by your given combination of columns and values and load it as current item.
+You can use `getItem()` to get all properties and values as array.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {array}     | Array of column names in keys and their values
 | 2   | {bool}      | flag: set to true to read relations too (or: use relRead() later)
 
 🟢 **Return**
