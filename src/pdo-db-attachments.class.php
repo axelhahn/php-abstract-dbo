@@ -83,7 +83,6 @@ class pdo_db_attachments extends pdo_db_base{
         $target_file=$this->_sUploadDir.'/'.$sTargetFolder. '/'.$sTargetFilemae;
         if($aFile['error']==0){
             if(!is_dir($this->_sUploadDir.'/'.$sTargetFolder)){
-                echo "Create $this->_sUploadDir.'/'.$sTargetFolder<br>";
                 if(!mkdir($this->_sUploadDir.'/'.$sTargetFolder, 0750, true)){
                     $this->_log(
                         PB_LOGLEVEL_ERROR, 
