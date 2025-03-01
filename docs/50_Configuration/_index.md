@@ -7,13 +7,10 @@ I assume to have a folder `apps`and `vendor` in the document root (or a subdir o
 ```txt
 apps
 ├── <application_1>
-│   ├── classes                             (3)
+│   ├── classes                             (2)
 │   │   ├── <object_1>.class.php
 │   │   :
 │   │   └── <object_N>.class.php
-│   │
-│   ├── config                              (2)
-│   │   └── objects.php
 │   ├── data
 │   └── files
 :
@@ -34,3 +31,7 @@ vendor/php-abstract-dbo                     (1)
 
 In the folder `vendor/php-abstract-dbo/src/` are all database base classes and a config file for the database connection.
 
+### (2) Your classes for objects
+
+In a folder for the applications put your classes for the objects.
+Each object has its own properties and will be stored as a table with the same name. The properties are its columns.

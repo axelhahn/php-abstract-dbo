@@ -1,14 +1,18 @@
 ## Object
 
-Each type of object has its own configuration. Which is a class that extends `pdo_db_base`.
+Each object has its own properties and will be stored as a table with the object name. 
+That object class extends `pdo_db_base` to inherit all the methods for CRUD actions and more.
 
-It looks like that:
+An object class defines the properties and its type. 
+Because everything is stored in a database a property must have a name and a type - where the type correspondents to a `create` value.
+
+Snippet ... It looks like that:
 
 ```php
 <?php
 namespace axelhahn;
 
-require_once "[...]/php-abstract-dbo/src/pdo-db-base.class.php";
+require_once "[...]/vendor/php-abstract-dbo/src/pdo-db-base.class.php";
 
 class objaddons extends pdo_db_base{
 
@@ -18,8 +22,8 @@ class objaddons extends pdo_db_base{
      * @var array 
      */
     protected array $_aProperties = [
-        '<fieldname_1>'       => [<create statement, type, validation options>],
-        '<fieldname_N>'       => [<create statement, type, validation options>],
+        '<fieldname_1>'       => [<create statement/ type, validation options, ...>],
+        '<fieldname_N>'       => [<create statement/ type, validation options, ...>],
     ];
 
     public function __construct(object $oDB)
@@ -60,7 +64,6 @@ class objaddons extends pdo_db_base{
         'version' => [
             'create' => 'varchar(32)',
             'validate_is'=>'string', 
-            'overview'=>1,
         ],
         'description' => [
             'create' => 'varchar(2046)', 
@@ -69,7 +72,6 @@ class objaddons extends pdo_db_base{
         'installation' => [
             'create' => 'text', 
             'validate_is'=>'string', 
-            'attr'=>[
         ],
         (...)
     ];
@@ -78,4 +80,5 @@ class objaddons extends pdo_db_base{
     {
         parent::__construct(__CLASS__, $oDB);
     }
-}        
+}
+```
