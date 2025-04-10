@@ -18,7 +18,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-02-20  ___  ah  last changes: create indexes
+ * 2025-04-11  ___  ah  last changes: remove required star in label
  * ======================================================================
  */
 
@@ -1603,10 +1603,6 @@ class pdo_db_base
 
         $aReturn['name'] = $sAttr;
         $aReturn['label'] = isset($aReturn['label']) ? $aReturn['label'] : $sAttr;
-
-        if (isset($aReturn['required']) && $aReturn['required']) {
-            $aReturn['label'] .= ' <span class="required">*</span>';
-        }
 
         // DEBUG:
         // $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');
