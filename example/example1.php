@@ -1,7 +1,10 @@
 <?php
 
+// load abstract database classes
 require "../src/pdo-db.class.php";
 require "../src/pdo-db-base.class.php";
+
+// load example object
 require "obj-example.class.php";
 
 

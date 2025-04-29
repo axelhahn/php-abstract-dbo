@@ -9,8 +9,17 @@ Like that:
 ```php
 $o->new();
 
-$o->set('label', 'my label'); // set properties
+// set properties one by one
+$o->set('label', 'my label');
 $o->set('description', 'This is a nice description.');
+
+/*
+OR set multiple properties an once
+$o->setItem([
+    'label'=>'my label',
+    'description'=>'This is a nice description.'
+]);
+*/
 
 $o->save(); // store to database
 ```

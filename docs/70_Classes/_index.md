@@ -41,7 +41,9 @@
 | $o->delete(ID)              | {bool}    | delete item with given ID in the database
 | <br>**RELATIONS**<br><br>
 | $o->relCreate(TABLE, ID)    | {bool}    | create a relation between current item and an id of another table
-| $o->relRead(FILTER)         | {array}   | get relations of the current item; FILTER is an optional array with keys "table" and optional "column"
+| $o->relRead(FILTER)         | {array}   | get relations of the current item; FILTER is an optional array with keys "table" and optional (deprecated) "column"
+| $o->relReadLookupItem(COLUMN) | {array} | Get array of referenced item of a lookup column.
+| $o->relReadObjects(OBJTYPE) | {array}   | Get list of array with relation objects of a given type.
 | $o->relUpdate(RELID, ID)    | {bool}    | Update a single relation from current item - set another id of the currently connected object.
 | $o->relDelete(RELID)        | {bool}    | delete a single relation of the current item 
 | $o->relDeleteAll()          | {bool}    | delete all relation of the current item 
