@@ -1107,6 +1107,13 @@ class pdo_db_base
      */
     public function relReadLookupItem(string $sColumn): array
     {
+        if (!isset($this->_aProperties[$sColumn]['lookup']['table'])) {
+            throw new Exception(__METHOD__ . ' Column ' . $sColumn . ' is not a lookup column');
+        }
+        if (!$this->get($sColumn)) {
+            return [];
+        }
+
         $sTargetTable = $this->_aProperties[$sColumn]['lookup']['table'];
         $sRelKey = $this->_getRelationKey($sTargetTable, 0, $sColumn);
         return $this->relRead([
@@ -1411,21 +1418,7 @@ class pdo_db_base
      */
     public function getRelLabel(string $sColumn): string|bool
     {
-        if (!isset($this->_aProperties[$sColumn]['lookup']['table'])) {
-            throw new Exception(__METHOD__ . ' Column ' . $sColumn . ' is not a lookup column');
-        }
-        if (!$this->get($sColumn)) {
-            return false;
-        }
-
-        $sTargetTable = $this->_aProperties[$sColumn]['lookup']['table'];
-        $sRelKey = $this->_getRelationKey($sTargetTable, 0, $sColumn);
-        $aItem = $this->relRead([
-            'table' => $this->_aProperties[$sColumn]['lookup']['table'],
-            'column' => $sColumn,
-        ])['_targets'][$sRelKey]['_target'] ?? false;
-
-        // print_r($aItem);
+        $aItem = $this->relReadLookupItem($sColumn);
         return $this->getLabel($aItem);
     }
 
