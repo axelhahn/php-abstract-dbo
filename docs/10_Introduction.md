@@ -16,14 +16,7 @@ $o->save(); // store to database
 ```
 
 All needed database actions are handled in a base class. All objects just extend it.
-
-### Debugging, logging
-
-On top is a database class that handles database queries, logging, debugging and performance data.
-
-### Relations
-
-There is a global relation table that links all objects. This link is transparent for both objects.
+There are some more features built in for logging, debugging, handle relations.
 
 ### Overview
 

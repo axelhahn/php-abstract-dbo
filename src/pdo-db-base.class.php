@@ -18,7 +18,6 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2025-02-20  ___  ah  last changes: create indexes
  * 2025-04-29  ___  ah  add methods getLookupItem(), relReadObjects()
  * ======================================================================
  */
@@ -1651,7 +1650,7 @@ class pdo_db_base
         // if (isset($aReturn['required']) && $aReturn['required']) {
         //     $aReturn['label'] .= ' <span class="required">*</span>';
         // }
-
+  
         // DEBUG:
         // $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');
 

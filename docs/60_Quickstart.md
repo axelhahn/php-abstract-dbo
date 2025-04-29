@@ -1,11 +1,11 @@
-## How to use this class
+## How to use the classes
 
 This page gives you an idea how Axels pdo-db classes can be used.
 
 There are 2 abstract classes:
 
 * A class for a <strong>PDO object</strong><br>It handles the database connection, makes all queries. With it we log all database queries incl. debug information and logging.
-* a class for your <strong>data objects</strong><br>Per table with your items you create a class with table definitions and extends the base class. Then it inherits all CRUD functions.
+* a class for your <strong>data objects</strong><br>Per object (=table) with your items you create a class with table definitions and extends the base class. Then it inherits all CRUD functions.
 
 ## Create PDO object
 
@@ -16,7 +16,7 @@ Define a database connection for a set of objects in the file `pdo-db.config.php
 <?php
 require_once __DIR__.'/vendor/php-abstract-dbo/src/pdo-db.class.php';
 $oDB=new axelhahn\pdo_db([
-    'db'=><ARRAY>,
+    "dsn" => "sqlite:" . __DIR__ . "/example.sqlite3",
 ]);
 ```
 
@@ -74,6 +74,8 @@ With the method `set(PROPERTY, VALUE)` you can modify the current value of a sin
 The method save() detects if the current item is new or not and executes create() or update().
 
 ```php
+$iCount=0;
+
 // create a new blank object; optional - it is done in the constructor
 $o->new();
 
@@ -111,9 +113,11 @@ Array
 )
 */
 
+// define your values in the array
 $aItem['label']='test'.($iCount+1);
 $aItem['description']='test object #'.($iCount+1);
 
+// aply values to current item
 $o->setItem($aItem);
 
 // store to database
@@ -136,6 +140,7 @@ This you can modify and save (see above).
 Get the current object into a hash
 
 ```php
+$o->read(25);
 $aItem=$o->getItem();
 ```
 
@@ -143,7 +148,8 @@ $aItem=$o->getItem();
 get a single value
 
 ```php
-// $o->get([KEY]);
+$o->read(25);
+// $o->get(<property>);
 $o->get('label');
 ```
 
@@ -152,6 +158,8 @@ $o->get('label');
 To delete a loaded item use
 
 ```php
+$o->read(25);
+...
 $o->delete();
 ```
 
@@ -194,5 +202,6 @@ array with search options
 The current item must be saved (to get an id) and then it can create a relation to a given table and its id.
 
 ```php
+$o->read(25);
 $o->relCreate('objlanguages', 1);
 ```
