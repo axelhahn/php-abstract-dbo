@@ -19,6 +19,7 @@
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
  * 2025-02-20  ___  ah  last changes: create indexes
+ * 2025-04-29  ___  ah  add methods getLookupItem(), relReadObjects()
  * ======================================================================
  */
 
@@ -1054,16 +1055,27 @@ class pdo_db_base
     }
 
     /**
-     * Get relations of the current item
+     * Get array with all relations of the current item
+     * 
+     * @see relReadLookupItem()
+     * @see relReadObjects()
+     * 
      * @param  array  $aFilter  optional: filter existing relations by table and column
      *                          Keys:
-     *                            table => <TARGETTABLE>  table must match
-     *                            column => <COLNAME>     column name must match too
+     *                            table => TARGETTABLE  table must match
+     *                            column => COLNAME     DEPRECATED - column name must match too; use relReadLookupItem(COLNAME)
      * @return array
      */
     public function relRead(array $aFilter = []): array
     {
         $this->_wd(__METHOD__ . '() reading relations for ' . $this->_table . ' item id ' . $this->id());
+        if($aFilter['column']??false){
+            $this->_log(
+                PB_LOGLEVEL_WARN, 
+                __METHOD__ . '()', 
+                "The 'column' filter is deprecated. Use relReadLookupItem(COLUMN) instead.");
+        }
+
         if (is_array($this->_aRelations) && !count($this->_aRelations)) {
             $this->_relRead();
         }
@@ -1084,6 +1096,38 @@ class pdo_db_base
             }
         } else {
             $aReturn = $this->_aRelations;
+        }
+        return $aReturn;
+    }
+
+    /**
+     * Get array of referenced item of a lookup column
+     * 
+     * @param string $sColumn  name of the lookup column
+     * @return array
+     */
+    public function relReadLookupItem(string $sColumn): array
+    {
+        $sTargetTable = $this->_aProperties[$sColumn]['lookup']['table'];
+        $sRelKey = $this->_getRelationKey($sTargetTable, 0, $sColumn);
+        return $this->relRead([
+            'table' => $this->_aProperties[$sColumn]['lookup']['table'],
+            'column' => $sColumn,
+        ])['_targets'][$sRelKey]['_target'] ?? [];
+    }
+
+    /**
+     * Get array of all related objects of a given object type
+     * 
+     * @param string $sObjectname  name of the object type
+     * @return array
+     */
+    protected function relReadObjects(string $sObjectname): array
+    {
+        $aRel=$this->relRead(['table' => $sObjectname]);
+        $aReturn=[];
+        foreach($aRel['_targets']??[] as $aTarget){
+            $aReturn[]=$aTarget['_target'];
         }
         return $aReturn;
     }
@@ -1604,9 +1648,9 @@ class pdo_db_base
         $aReturn['name'] = $sAttr;
         $aReturn['label'] = isset($aReturn['label']) ? $aReturn['label'] : $sAttr;
 
-        if (isset($aReturn['required']) && $aReturn['required']) {
-            $aReturn['label'] .= ' <span class="required">*</span>';
-        }
+        // if (isset($aReturn['required']) && $aReturn['required']) {
+        //     $aReturn['label'] .= ' <span class="required">*</span>';
+        // }
 
         // DEBUG:
         // $aReturn['title']=$sAttr . ' --> '.(isset($aReturn['debug']) ? print_r($aReturn['debug'], 1) : 'NO DEBUG');

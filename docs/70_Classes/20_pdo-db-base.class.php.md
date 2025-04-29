@@ -323,14 +323,46 @@ bool
 ### relRead()
 
 Get an array of the relations of the current object to other objects.
-Without filter you get all relations. 
+Without filter you get all relations.
 A filter can limit the relations to a given table and an optional column.
 
 🔷 **Parameters**
 
 | #   | Type        | Description
 |:---:|:---:        |---
-| 1   | {array}     | optional: filter existing relations by table and column<br>Keys:<br>- "table" => &lt;TARGETTABLE&gt; - table must match<br>- "column" => &lt;COLNAME&gt; - column name must match too
+| 1   | {array}     | optional: filter existing relations by table and column<br>Keys:<br>- "table" => &lt;TARGETTABLE&gt; - table must match<br>- DEPRECATED: "column" => &lt;COLNAME&gt; - column name must match too
+
+🟢 **Return**
+
+Array
+
+### relReadLookupItem()
+
+Get array of referenced item of a lookup column.
+If you have a lookup value that references another database then the item stores the id o the target item. The name of the referenced table/ object is in the configuration file.
+
+This method returns an array with the referenced item.
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | Column name of the lookup column
+
+🟢 **Return**
+
+Array
+
+### relReadObjects()
+
+Get list of array with relation objects of a given type.
+This method returns a much simpler structure than relRead()
+
+🔷 **Parameters**
+
+| #   | Type        | Description
+|:---:|:---:        |---
+| 1   | {string}    | object type to filter
 
 🟢 **Return**
 
