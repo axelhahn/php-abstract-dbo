@@ -1,0 +1,665 @@
+---
+title: axelhahn\pdo_db_attachments
+generator: Axels php-classdoc; https://github.com/axelhahn/php-classdoc
+---
+
+## 📦 Class axelhahn\pdo_db_attachments
+
+```txt
+
+```
+
+## 🔶 Properties
+
+(none)
+
+## 🔷 Methods
+
+### 🔹 public __construct()
+
+Constructor
+
+Line [43](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L43) (4 lines)
+
+**Return**: `void`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $oDB | `axelhahn\pdo_db` | pdo_db $oDB          instance of database object class
+
+### 🔹 public hookActions()
+
+Get array of all hook actions
+ Keys:
+   - backend_preview   {string}  method name for preview in AxelOM
+   - <any>             {string}  method name four your custom action
+
+Line [63](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L63) (8 lines)
+
+**Return**: `array`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public getRelativePath()
+
+Get relative path of a file with full path relative to upload base dir
+ Used in storeNewFile()
+
+Line [80](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L80) (4 lines)
+
+**Return**: `string`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $FileWithFullPath | `string` | filename
+
+### 🔹 public uploadFile()
+
+Upload files given by $_FILES from a form and optionally create a
+ relation to a given target object
+
+ see pages/object.php
+
+Line [103](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L103) (66 lines)
+
+**Return**: `int|bool`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aFile | `array` | single array element of $_FILES which means
+                      - name      {string} => filename, eg. my-image.png
+                      - full_path {string} => ignored
+                      - type      {string} => MIME type eg. image/png
+                      - tmp_name  {string} => location of uploaded file eg. /tmp/php2hi7k4315in34bgFjGz/tmp/php2hi7k4315in34bgFjGz
+                      - error     {int}    => error code, eg 0 for OK
+                      - size      {int}    => filesize in byte eg. 312039
+
+### 🔹 public storeNewFile()
+
+Add a file that is located in the upload base path as attachment object
+
+Line [182](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L182) (25 lines)
+
+**Return**: `int|bool`
+
+**Parameters**: **2** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sFileWithFullPath | `string` | 
+| \<optional\> $aProperties | `array` | array with settings to write; possible keys are
+                                   - label
+                                   - description
+                                   - mime
+                                   - width
+                                   - height
+
+### 🔹 public attachmentPreview()
+
+Get html code for attachment preview
+
+Line [247](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L247) (49 lines)
+
+**Return**: `string`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aOptions | `array` | array of options; known keys:
+                          - baseurl {string}  set base url for attachments that triggers -> setUrlBase(<baseurl>)
+
+### 🔹 public setUploadDir()
+
+Sets the upload directory for the file attachments.
+
+Line [307](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L307) (8 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sDir | `string` | The directory path to set as the upload directory.
+
+### 🔹 public setUrlBase()
+
+Sets the base URL for the file attachments
+
+Line [322](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L322) (4 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sUrl | `string` | The base URL to set.
+
+### 🔹 public getTablename()
+
+Get a table name of a given class name
+ @see reverse function _getObjectFromTablename()
+
+Line [150](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L150) (4 lines)
+
+**Return**: `string`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $s | `string` | input string to generate a table name from
+
+### 🔹 public makeQuery()
+
+Execute a sql statement
+ a wrapper for $this->_pdo->makeQuery() that adds the current table
+
+Line [193](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L193) (5 lines)
+
+**Return**: `array|bool`
+
+**Parameters**: **2** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sSql | `string` | sql statement
+| \<optional\> $aData | `array` | array with data items; if present prepare statement will be executed
+
+### 🔹 public verifyColumns()
+
+Verify database columns with current object configuration. It shows
+ - missing columns
+ - existing database columns that are not configured
+ - columns with wrong type
+
+Line [284](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L284) (102 lines)
+
+**Return**: `array|bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public new()
+
+Generate a hash for a new empty item
+
+Line [416](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L416) (13 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public create()
+
+Create a new entry in the database
+
+Line [469](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L469) (30 lines)
+
+**Return**: `int|bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public read()
+
+Read an entry from database by known row id
+
+Line [506](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L506) (8 lines)
+
+**Return**: `bool`
+
+**Parameters**: **2** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $iId | `int` | row id to read
+| \<optional\> $bReadRelations | `bool` | read relation too? default: false
+
+### 🔹 public readByFields()
+
+Read item from row by given fields with AND condition
+ Useful for reading item by known uniq single or multiple column values
+
+Line [523](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L523) (67 lines)
+
+**Return**: `bool`
+
+**Parameters**: **2** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $aColumns | `array` | 
+| \<optional\> $bReadRelations | `bool` | 
+
+### 🔹 public _relGetTargetIds()
+
+Get relations of the current item by given column
+ It returns an array with [relation_id => id_of_target_column]
+
+Line [598](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L598) (13 lines)
+
+**Return**: `array`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $sCol | `string` | column name
+
+### 🔹 public relSync()
+
+Sync the relations of the current item to the relation table
+ - store new relations
+ - remove outdated relations
+
+Line [619](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L619) (58 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public update()
+
+Update entry; the field "id" is required to identify a single row in the table
+ It returns false if the current item has no changes.
+ It returns the id of the object if the update was successful
+
+Line [684](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L684) (28 lines)
+
+**Return**: `int|bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public delete()
+
+Delete entry by a given id or current item
+
+Line [718](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L718) (50 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $iId | `int` | optional: id of the entry to delete; default: delete current item
+
+### 🔹 public flush()
+
+!!! DANGEROUS !!!
+ Drop table of current object type. It deletes all items of a type and
+ removes the schema from database
+
+Line [780](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L780) (22 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public save()
+
+Save item. If id is set, update. Otherwise create.
+
+Line [807](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L807) (6 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public relCreate()
+
+Create a relation from the current item to an id of a target object
+
+Line [948](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L948) (74 lines)
+
+**Return**: `bool`
+
+**Parameters**: **3** (required: 2)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sToTable | `string` | target object
+| \<required\> $iToId | `int` | id of target object
+| \<optional\> $sFromColumn | `?string` | optional: source column
+
+### 🔹 public relRead()
+
+Get array with all relations of the current item
+
+ @see relReadLookupItem()
+
+Line [1116](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1116) (24 lines)
+
+**Return**: `array`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aFilter | `array` | optional: filter existing relations by table and column
+                          Keys:
+                            table => TARGETTABLE  target table must match
+                            column => COLNAME     column name must match
+
+### 🔹 public relReadLookupItem()
+
+Get array of referenced item of a lookup column
+
+Line [1147](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1147) (16 lines)
+
+**Return**: `array`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sColumn | `string` | name column that is a of the lookup column to another table
+
+### 🔹 public relDelete()
+
+Delete a single relation from current item
+
+Line [1234](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1234) (12 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $iId | `int` | optional: id of the relation to delete
+
+### 🔹 public relDeleteAll()
+
+Delete all relations of a single item
+ called by delete(ID) before deleting the item itself
+
+Line [1253](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1253) (24 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $iId | `int` | if of an item; default: false (=current item)
+
+### 🔹 public relFlush()
+
+Delete all relations of current object type.
+ Called by flush() before deleting all items of a type.
+
+Line [1283](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1283) (8 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public count()
+
+Get count of existing items
+
+Line [1299](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1299) (5 lines)
+
+**Return**: `int`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public get()
+
+Get a single property of an item.
+ opposite function of set(KEY, VALUE)
+
+Line [1311](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1311) (8 lines)
+
+**Return**: `mixed`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sKey2Get | `string` | key of your object to set
+
+### 🔹 public getAttributes()
+
+Get array of attribute names
+
+Line [1325](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1325) (6 lines)
+
+**Return**: `array`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $bWithValues | `bool` | flag: including values? default: false
+
+### 🔹 public getBasicAttributes()
+
+Get array of main attributes to show in overview or to select a relation
+
+Line [1336](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1336) (26 lines)
+
+**Return**: `array`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $bWithSortkey | `bool` | 
+
+### 🔹 public getDescriptionLine()
+
+Get a single line for a database row description
+
+ It fetches the basic attributes of the item and creates a single line string
+ with values of the item, separated by dashes.
+ If the item has no data, it returns false.
+
+Line [1373](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1373) (19 lines)
+
+**Return**: `string|bool`
+
+**Parameters**: **1** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aItem | `array` | optional: item data; default: current item
+
+### 🔹 public getLabel()
+
+Get a label for the item.
+ It fetches the basic attributes if needed.
+ Alternatively it uses the id
+
+Line [1402](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1402) (37 lines)
+
+**Return**: `string`
+
+**Parameters**: **2** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aItem | `array` | optional: item data; default: current item
+| \<optional\> $aColumns | `array` | optional: array of columns to show; default: basic attributes
+
+### 🔹 public getRelLabel()
+
+For 1:1 lookups: get the label of the related item by a given column.
+ It fetches the current value of the column and returns the label of the
+ connected item of the lookup table
+
+Line [1448](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1448) (5 lines)
+
+**Return**: `string|bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sColumn | `string` | name of the lookup column
+
+### 🔹 public getItem()
+
+Get current item as an array
+
+Line [1458](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1458) (4 lines)
+
+**Return**: `array`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public getFormtype()
+
+Return or guess the form type of a given attribute
+ If $this->_aProperties[$sAttr]['attr'] was defined then it returns that value.
+ Otherwise the type will be guessed based on the attribute name or create statement.
+
+ Guess behaviour by create statement
+ - text -> textarea
+ - varchar -> input type text; maxsize is size of varchar
+ - varchar with more than 1024 byte -> textarea
+
+ If attribute starts with
+   - "color"    -> input with type "color"
+   - "date"     -> input with type "date"
+   - "datetime" -> input with type "datetime-local"
+   - "email"    -> input with type "email"
+   - "html"     -> textarea with type "html"
+   - "month"    -> input with type "month"    !! check browser compatibility
+   - "number"   -> input with type "number"
+   - "password" -> input with type "password" !! additional logic required
+   - "range"    -> input with type "range"
+   - "tel"      -> input with type "tel"
+   - "time"     -> input with type "time"
+   - "url"      -> input with type "url"
+   - "week"     -> input with type "week"     !! check browser compatibility
+
+Line [1491](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1491) (205 lines)
+
+**Return**: `array|bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sAttr | `string` | name of the property
+
+### 🔹 public hasChange()
+
+Get bool if the current dataset item was changed
+
+Line [1701](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1701) (5 lines)
+
+**Return**: `bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public id()
+
+Get id of the current item as integer
+ it returns false if there is no id
+
+Line [1712](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1712) (4 lines)
+
+**Return**: `int|bool`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public getTable()
+
+Get current table
+
+Line [1721](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1721) (4 lines)
+
+**Return**: `string`
+
+**Parameters**: **0** (required: 0)
+
+### 🔹 public search()
+
+Search for items in the current table
+ You should use ":<placeholder>" in your sql statements to use
+ prepared statements
+
+Line [1743](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1743) (57 lines)
+
+**Return**: `array|bool`
+
+**Parameters**: **2** (required: 0)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<optional\> $aOptions | `array` | array with search options
+                          - columns - array|string
+                          - where   - array|string
+                          - order   - array|string
+                          - limit   - string
+| \<optional\> $aData | `array` | array with values for prepared statement
+
+### 🔹 public validate()
+
+Validate a new value to be set on a property and return bool for success
+ - The general fields (id, timecreated, timeupdated, delete) cannot be set.
+ - validate a field if validate_is set a type or auto detected by "create" key in property
+ - validate a field if validate_regex set regex
+ This method is called in set() but can be executed on its own
+
+ @see set()
+ @throws \Exception
+
+Line [1849](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1849) (77 lines)
+
+**Return**: `bool`
+
+**Parameters**: **2** (required: 2)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sKey2Set | `string` | key of your object to set
+| \<required\> $value | `mixed` | new value to set
+
+### 🔹 public set()
+
+Set a single property of an item.
+ - The general fields (id, timecreated, timeupdated, delete) cannot be set.
+ - validate a field if validate_is set a tyoe
+ - validate a field if validate_regex set regex
+ Opposite function of get()
+
+Line [1938](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1938) (26 lines)
+
+**Return**: `bool`
+
+**Parameters**: **2** (required: 2)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $sKey2Set | `string` | key of your object to set
+| \<required\> $value | `mixed` | new value to set
+
+### 🔹 public setItem()
+
+Set new values for an item.
+ The general fields (id, created, updated, delete) cannot be set.
+ Opposite function if getItem()
+
+Line [1972](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L1972) (20 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $aNewValues | `array` | new values to set; a subset of this->_aItem
+
+---
+Generated with [Axels PHP class doc parser](https://github.com/axelhahn/php-classdoc)

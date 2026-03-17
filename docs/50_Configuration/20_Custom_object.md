@@ -40,8 +40,8 @@ Each field has a key and a value.
 
 | Key            | type     | default | description |
 | ---            | ---      | ---   | --- |
-| create         | {string} | -     | Create statement for this property like<br>- integer<br>- varchar(32)<br>- varchar(4096) |
-| validate_is    | {string} | -     | Validation rule for this property <br>- "string" value must be a string<br>- "integer" value must be an integer|
+| create         | {string} | -     | Create statement for this property like<br>- integer<br>- varchar(32)<br>- varchar(4096)<br>- datetime<br>- text |
+| validate_is    | {string} | -     | Validation rule for this property <br>- "string" value must be a string<br>- "integer" value must be an integer<br>- "array" value must be an array (for arrays or 1:n relation) |
 | validate_regex | {string} | -     | if set a value must match this regular expression |
 | index          | {bool}   | false | Create an index for this column |
 
