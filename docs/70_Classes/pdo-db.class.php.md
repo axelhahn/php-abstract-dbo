@@ -319,45 +319,6 @@ Line [621](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 | \<optional\> $sOutfile | `string` | optional: output file name
 | \<optional\> $aTables | `array` | optional: array of tables to dump; default: false (dumps all tables)
 
-### 🔹 public import_old()
-
-Import data from a json file; reverse function of dump()
- TODO: handle options array
-
- @example:
- $aOptions = [
-     'global' => [
-         'drop' => false,
-         'create' => true, // create table if it does not exist
-         'import' => true,
-     ],
-     // when given, only these tables will be imported
-     'tables' => [
-         'table1' => [
-              // optionally: override global settings
-             'drop' => false,
-             'create-if-not-exists' => true,
-             'import' => true,
-         ],
-         'tableN' => [
-             ...
-         ]
-     ]
- @see dump()
-
-Line [765](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L765) (45 lines)
-
-**Return**: `bool`
-
-**Parameters**: **2** (required: 1)
-
-| Parameter | Type | Description
-|--         |--    |--
-| \<required\> $sFile | `string` | json file to import
-| \<optional\> $aOptions | `array` | UNUSED optional: options array with these keys
-                               - 'global' {array}  options for all tables
-                               - 'tables' {array}  options for all tables
-
 ### 🔹 public import()
 
 Import data from a json file; reverse function of dump()
@@ -385,7 +346,7 @@ Import data from a json file; reverse function of dump()
      ]
  @see dump()
 
-Line [901](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L901) (157 lines)
+Line [825](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L825) (157 lines)
 
 **Return**: `bool`
 
@@ -429,7 +390,7 @@ Analyze given backup file and generate a summary
      'error' => <string>,
  ]
 
-Line [1089](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L1089) (51 lines)
+Line [1013](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L1013) (51 lines)
 
 **Return**: `array`
 
