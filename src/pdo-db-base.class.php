@@ -1104,18 +1104,50 @@ class pdo_db_base
 
     /**
      * Get array with all relations of the current item.
-     * It can be filtered by a given target table and optional column.
-     * By default it returns information to the relation.
+     * It can be filtered by a given target 
+     * - by table and optional additionally the target column
+     * - by a property of current item (that must be a lookup)
      * 
+     * By default it returns information to the relation and the relation target
      * By adding filter 'targetonly' => true only the target items of 
      * subkey "_target" will be returned (without relation).
+     * 
+     * Response is a list of such items
+     * Array
+     * (
+     *     [0] => Array
+     *         ( 
+     *             [id] => 4
+     *                 [timecreated] => 2025-05-14 10:29:20
+     *                 [timeupdated] => 
+     *                 [deleted] => 0
+     *                 [uuid] => a30b5c8daf408c521f24d4efca021547
+     *                 [remark] => 
+     *                 [_column] => 
+     *                 [_totable] => objvideos
+     *                 [_tocolumn] => videofile
+     *                 [_toid] => 3
+     *                 [_target] => Array
+     *                     (
+     *                         [id] => 3
+     *                         [timecreated] => 2025-05-14 10:29:20
+     *                         [timeupdated] => 2025-05-14 16:23:22
+     *                         [deleted] => 0
+     *                         [label] => My video file
+     *                         [videofile] => 3
+     *                         [description] => 
+     *                     )
+     *             )
+     *     )
+     * 
      * 
      * @see relReadLookupItem()
      * 
      * @param  array  $aFilter  optional: filter existing relations by table and column
      *                          Keys:
      *                            table      => TARGETTABLE  target table must match
-     *                            column     => COLNAME      column name must match
+     *                            column     => COLNAME      target column name must match
+     *                            property   => COLNAME      find related target linked in my given property
      *                            targetonly => bool         Flag to return not the relation but linked items only
      * @return array
      */
@@ -1133,7 +1165,10 @@ class pdo_db_base
             if (($aFilter['table']??false) && $aRelation['_totable'] !== $aFilter['table']) {
                 $bAdd=false;
             }
-            if (($aFilter['column']??false) && $aRelation['_column'] !== $aFilter['column']) {
+            if (($aFilter['column']??false) && $aRelation['_tocolumn'] !== $aFilter['column']) {
+                $bAdd=false;
+            }
+            if (($aFilter['property']??false) && $aRelation['_column'] !== $aFilter['property']) {
                 $bAdd=false;
             }
 
@@ -1150,7 +1185,7 @@ class pdo_db_base
     /**
      * Get array of referenced item of a lookup column
      * 
-     * @param string $sColumn  name column that is a of the lookup column to another table
+     * @param string $sColumn  column/ property that is a lookup to another table
      * @return array
      */
     public function relReadLookupItem(string $sColumn): array
@@ -1166,7 +1201,7 @@ class pdo_db_base
 
         return $this->relRead([
             'table' => $sTargetTable,
-            'column' => $sColumn,
+            'property' => $sColumn,
             'targetonly' => true,
         ])[0]??[];
     }
