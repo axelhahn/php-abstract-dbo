@@ -600,8 +600,8 @@ class pdo_db_base
         $aReturn = [];
         // $sTargetTable = (string) ($this->_aProperties[$sCol]['lookup']['table'] ?? '');
 
-        $aFilter= $sCol ? ['column' => $sCol] : []; 
-        $aFilter= ['column' => $sCol]; 
+        $aFilter= $sCol ? ['property' => $sCol] : []; 
+        $aFilter= ['property' => $sCol]; 
         foreach($this->relRead($aFilter) as $aRelation){
             $aReturn[$aRelation['id']] = (int) $aRelation['_toid'];
         }
