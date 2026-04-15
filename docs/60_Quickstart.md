@@ -66,6 +66,8 @@ $o=new objexample($oDB);
 // echo "- found records: " . $o->count()."<br>";
 ```
 
+### Usage
+
 ### Set value
 
 Variant 1:
@@ -144,7 +146,6 @@ $o->read(25);
 $aItem=$o->getItem();
 ```
 
-
 get a single value
 
 ```php
@@ -197,11 +198,80 @@ array with search options
 - limit   - string
 ```
 
-### relCreate
+## Relations
+
+There are 2 types of relations:
+
+* a relation between two objects (of different or the same type)
+* a property that defines a lookup onto another table.
+
+### Create
 
 The current item must be saved (to get an id) and then it can create a relation to a given table and its id.
 
 ```php
 $o->read(25);
 $o->relCreate('objlanguages', 1);
+```
+
+### Read
+
+Read relations of the current item.
+
+To get all relations of the current item:
+
+```php
+$o->read(25);
+$aRelations=$o->relRead();
+```
+
+You can limit the relations to a specific table by target
+
+```php
+$aRelations=$o->relRead([
+    'table'=><targettable>,
+    'column'=><targettable.column>, // optional
+    ]);
+```
+
+... or if you know that a property is a lookup
+
+```php
+$o->read(25);
+$aRelations=$o->relRead([
+    'property'=><propertyname>,
+    ]);
+```
+
+The response can be filtered by adding 'targetonly' => true
+
+```php
+$aRelations=$o->relRead([
+    'property'=><propertyname>,
+    'targetonly' => true,
+    ]);
+```
+
+### Delete
+
+You can remove a relation by id of the relation. That ID must be a relation ID that exists for the current item.
+
+```php
+$o->read(25);
+$aRelations=$o->relRead([<options>]);
+
+// loop over $aRelations ... and get the field 'id' from relation to delete
+$o->relDelete(<id>);
+```
+
+To delete all relations of the current item:
+
+```php
+$o->relDeleteAll();
+```
+
+To delete all relations of the current object type:
+
+```php
+$o->relFlush();
 ```

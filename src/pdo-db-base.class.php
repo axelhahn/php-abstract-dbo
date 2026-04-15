@@ -1113,6 +1113,7 @@ class pdo_db_base
      * subkey "_target" will be returned (without relation).
      * 
      * Response is a list of such items
+     * <code>
      * Array
      * (
      *     [0] => Array
@@ -1139,7 +1140,7 @@ class pdo_db_base
      *                     )
      *             )
      *     )
-     * 
+     * </code>
      * 
      * @see relReadLookupItem()
      * 
@@ -1183,7 +1184,10 @@ class pdo_db_base
     }
 
     /**
-     * Get array of referenced item of a lookup column
+     * Get array with referenced single item of a lookup column
+     * The response comes from relRead() with option targetonly = true
+     * 
+     * @see relRead()
      * 
      * @param string $sColumn  column/ property that is a lookup to another table
      * @return array
@@ -1272,21 +1276,23 @@ class pdo_db_base
      */
 
     /**
-     * Delete a single relation from current item
-     * @param  int     $iId      optional: id of the relation to delete
+     * Delete a single relation from current item.
+     * If you want to delete all relations of a single item, use relDeleteAll()
+     * 
+     * TODO: check if relation exists in current item
+     * 
+     * @param  int     $iId      id of the relation to delete
      * @return bool
      */
-    public function relDelete(int $iId=0): bool
+    public function relDelete(int $iId): bool
     {
-        $oRelation = new pdo_db_relations($this->_pdo);
-        if($iId){
-            return $oRelation->delete($iId);
+        foreach($this->relRead() as $aRelation){
+            if($aRelation['id']===$iId){
+                $oRelation = new pdo_db_relations($this->_pdo);
+                return $oRelation->delete($iId);
+            }
         }
-        $bReturn=true;
-        foreach(array_keys($this->_relGetTargetIds($sRelKey)) as $iId){
-            $bReturn = $bReturn && $oRelation->delete((int) $iId);
-        }
-        return $bReturn;
+        return false;
     }
 
     /**
