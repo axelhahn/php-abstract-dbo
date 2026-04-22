@@ -148,7 +148,7 @@ Line [322](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 Get a table name of a given class name
  @see reverse function _getObjectFromTablename()
 
-Line [150](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L150) (4 lines)
+Line [151](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L151) (4 lines)
 
 **Return**: `string`
 
@@ -163,7 +163,7 @@ Line [150](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 Execute a sql statement
  a wrapper for $this->_pdo->makeQuery() that adds the current table
 
-Line [193](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L193) (5 lines)
+Line [194](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L194) (5 lines)
 
 **Return**: `array|bool`
 
@@ -181,7 +181,7 @@ Verify database columns with current object configuration. It shows
  - existing database columns that are not configured
  - columns with wrong type
 
-Line [284](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L284) (102 lines)
+Line [285](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L285) (102 lines)
 
 **Return**: `array|bool`
 
@@ -191,7 +191,7 @@ Line [284](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Generate a hash for a new empty item
 
-Line [416](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L416) (13 lines)
+Line [417](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L417) (13 lines)
 
 **Return**: `bool`
 
@@ -201,7 +201,7 @@ Line [416](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Create a new entry in the database
 
-Line [469](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L469) (30 lines)
+Line [470](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L470) (30 lines)
 
 **Return**: `int|bool`
 
@@ -211,7 +211,7 @@ Line [469](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Read an entry from database by known row id
 
-Line [506](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L506) (8 lines)
+Line [507](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L507) (8 lines)
 
 **Return**: `bool`
 
@@ -227,7 +227,7 @@ Line [506](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 Read item from row by given fields with AND condition
  Useful for reading item by known uniq single or multiple column values
 
-Line [523](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L523) (67 lines)
+Line [524](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L524) (67 lines)
 
 **Return**: `bool`
 
@@ -243,7 +243,7 @@ Line [523](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 Get relations of the current item by given column
  It returns an array with [relation_id => id_of_target_column]
 
-Line [598](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L598) (13 lines)
+Line [599](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L599) (13 lines)
 
 **Return**: `array`
 
@@ -259,7 +259,7 @@ Sync the relations of the current item to the relation table
  - store new relations
  - remove outdated relations
 
-Line [619](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L619) (58 lines)
+Line [620](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L620) (58 lines)
 
 **Return**: `bool`
 
@@ -271,7 +271,7 @@ Update entry; the field "id" is required to identify a single row in the table
  It returns false if the current item has no changes.
  It returns the id of the object if the update was successful
 
-Line [684](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L684) (28 lines)
+Line [685](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L685) (28 lines)
 
 **Return**: `int|bool`
 
@@ -281,7 +281,7 @@ Line [684](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Delete entry by a given id or current item
 
-Line [718](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L718) (50 lines)
+Line [719](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L719) (50 lines)
 
 **Return**: `bool`
 
@@ -297,7 +297,7 @@ Line [718](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
  Drop table of current object type. It deletes all items of a type and
  removes the schema from database
 
-Line [780](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L780) (22 lines)
+Line [781](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L781) (22 lines)
 
 **Return**: `bool`
 
@@ -307,7 +307,7 @@ Line [780](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Save item. If id is set, update. Otherwise create.
 
-Line [807](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L807) (6 lines)
+Line [808](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L808) (6 lines)
 
 **Return**: `bool`
 
@@ -317,7 +317,7 @@ Line [807](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-att
 
 Create a relation from the current item to an id of a target object
 
-Line [948](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L948) (74 lines)
+Line [949](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-attachments.class.php#L949) (74 lines)
 
 **Return**: `bool`
 
