@@ -24,7 +24,7 @@ generator: Axels php-classdoc; https://github.com/axelhahn/php-classdoc
 Constructor - sets internal environment variables and checks existence
  of the database
 
-Line [120](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L120) (20 lines)
+Line [121](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L121) (20 lines)
 
 **Return**: `void`
 
@@ -40,7 +40,7 @@ Line [120](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 Get a table name of a given class name
  @see reverse function _getObjectFromTablename()
 
-Line [151](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L151) (4 lines)
+Line [152](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L152) (4 lines)
 
 **Return**: `string`
 
@@ -55,7 +55,7 @@ Line [151](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 Execute a sql statement
  a wrapper for $this->_pdo->makeQuery() that adds the current table
 
-Line [194](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L194) (5 lines)
+Line [195](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L195) (5 lines)
 
 **Return**: `array|bool`
 
@@ -73,7 +73,7 @@ Verify database columns with current object configuration. It shows
  - existing database columns that are not configured
  - columns with wrong type
 
-Line [285](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L285) (102 lines)
+Line [286](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L286) (102 lines)
 
 **Return**: `array|bool`
 
@@ -83,7 +83,7 @@ Line [285](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 
 Generate a hash for a new empty item
 
-Line [417](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L417) (13 lines)
+Line [418](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L418) (13 lines)
 
 **Return**: `bool`
 
@@ -93,7 +93,7 @@ Line [417](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 
 Create a new entry in the database
 
-Line [470](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L470) (30 lines)
+Line [471](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L471) (30 lines)
 
 **Return**: `int|bool`
 
@@ -103,7 +103,7 @@ Line [470](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 
 Read an entry from database by known row id
 
-Line [507](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L507) (8 lines)
+Line [508](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L508) (8 lines)
 
 **Return**: `bool`
 
@@ -119,7 +119,7 @@ Line [507](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 Read item from row by given fields with AND condition
  Useful for reading item by known uniq single or multiple column values
 
-Line [524](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L524) (67 lines)
+Line [525](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L525) (67 lines)
 
 **Return**: `bool`
 
@@ -135,7 +135,7 @@ Line [524](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 Get relations of the current item by given column
  It returns an array with [relation_id => id_of_target_column]
 
-Line [599](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L599) (13 lines)
+Line [600](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L600) (13 lines)
 
 **Return**: `array`
 
@@ -151,7 +151,7 @@ Sync the relations of the current item to the relation table
  - store new relations
  - remove outdated relations
 
-Line [620](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L620) (58 lines)
+Line [621](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L621) (58 lines)
 
 **Return**: `bool`
 
@@ -163,7 +163,7 @@ Update entry; the field "id" is required to identify a single row in the table
  It returns false if the current item has no changes.
  It returns the id of the object if the update was successful
 
-Line [685](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L685) (28 lines)
+Line [686](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L686) (28 lines)
 
 **Return**: `int|bool`
 
@@ -179,7 +179,7 @@ Delete entry by a given id or current item
  - hookDelete()    - your optional hook
  - delete item in object
 
-Line [726](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L726) (63 lines)
+Line [727](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L727) (63 lines)
 
 **Return**: `bool`
 
@@ -195,7 +195,7 @@ Line [726](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
  Drop table of current object type. It deletes all items of a type and
  removes the schema from database
 
-Line [801](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L801) (22 lines)
+Line [802](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L802) (22 lines)
 
 **Return**: `bool`
 
@@ -205,7 +205,7 @@ Line [801](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 
 Save item. If id is set, update. Otherwise create.
 
-Line [828](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L828) (6 lines)
+Line [829](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L829) (6 lines)
 
 **Return**: `bool`
 
@@ -215,7 +215,7 @@ Line [828](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-bas
 
 Create a relation from the current item to an id of a target object
 
-Line [969](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L969) (74 lines)
+Line [970](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L970) (74 lines)
 
 **Return**: `bool`
 
@@ -274,7 +274,7 @@ Get array with all relations of the current item.
 
  @see relReadLookupItem()
 
-Line [1176](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1176) (30 lines)
+Line [1177](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1177) (30 lines)
 
 **Return**: `array`
 
@@ -296,7 +296,7 @@ Get array with referenced single item of a lookup column
 
  @see relRead()
 
-Line [1216](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1216) (17 lines)
+Line [1217](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1217) (17 lines)
 
 **Return**: `array`
 
@@ -313,7 +313,7 @@ Delete a single relation from current item.
 
  TODO: check if relation exists in current item
 
-Line [1243](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1243) (10 lines)
+Line [1244](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1244) (10 lines)
 
 **Return**: `bool`
 
@@ -328,7 +328,7 @@ Line [1243](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 Delete all relations of a single item
  called by delete(ID) before deleting the item itself
 
-Line [1260](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1260) (27 lines)
+Line [1261](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1261) (27 lines)
 
 **Return**: `bool`
 
@@ -343,7 +343,7 @@ Line [1260](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 Delete all relations of current object type.
  Called by flush() before deleting all items of a type.
 
-Line [1293](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1293) (8 lines)
+Line [1294](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1294) (8 lines)
 
 **Return**: `bool`
 
@@ -353,7 +353,7 @@ Line [1293](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get count of existing items
 
-Line [1309](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1309) (5 lines)
+Line [1310](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1310) (5 lines)
 
 **Return**: `int`
 
@@ -364,7 +364,7 @@ Line [1309](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 Get a single property of an item.
  opposite function of set(KEY, VALUE)
 
-Line [1321](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1321) (8 lines)
+Line [1322](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1322) (8 lines)
 
 **Return**: `mixed`
 
@@ -378,7 +378,7 @@ Line [1321](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get array of attribute names
 
-Line [1335](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1335) (6 lines)
+Line [1336](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1336) (6 lines)
 
 **Return**: `array`
 
@@ -392,7 +392,7 @@ Line [1335](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get array of main attributes to show in overview or to select a relation
 
-Line [1346](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1346) (26 lines)
+Line [1347](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1347) (26 lines)
 
 **Return**: `array`
 
@@ -410,7 +410,7 @@ Get a single line for a database row description
  with values of the item, separated by dashes.
  If the item has no data, it returns false.
 
-Line [1383](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1383) (19 lines)
+Line [1384](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1384) (19 lines)
 
 **Return**: `string|bool`
 
@@ -426,7 +426,7 @@ Get a label for the item.
  It fetches the basic attributes if needed.
  Alternatively it uses the id
 
-Line [1412](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1412) (37 lines)
+Line [1413](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1413) (37 lines)
 
 **Return**: `string`
 
@@ -443,7 +443,7 @@ For 1:1 lookups: get the label of the related item by a given column.
  It fetches the current value of the column and returns the label of the
  connected item of the lookup table
 
-Line [1458](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1458) (5 lines)
+Line [1459](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1459) (5 lines)
 
 **Return**: `string|bool`
 
@@ -457,7 +457,7 @@ Line [1458](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get current item as an array
 
-Line [1468](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1468) (4 lines)
+Line [1469](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1469) (4 lines)
 
 **Return**: `array`
 
@@ -489,7 +489,7 @@ Return or guess the form type of a given attribute
    - "url"      -> input with type "url"
    - "week"     -> input with type "week"     !! check browser compatibility
 
-Line [1501](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1501) (205 lines)
+Line [1502](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1502) (205 lines)
 
 **Return**: `array|bool`
 
@@ -503,7 +503,7 @@ Line [1501](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get bool if the current dataset item was changed
 
-Line [1711](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1711) (5 lines)
+Line [1712](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1712) (5 lines)
 
 **Return**: `bool`
 
@@ -514,7 +514,7 @@ Line [1711](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 Get id of the current item as integer
  it returns false if there is no id
 
-Line [1722](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1722) (4 lines)
+Line [1723](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1723) (4 lines)
 
 **Return**: `int|bool`
 
@@ -524,7 +524,7 @@ Line [1722](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-ba
 
 Get current table
 
-Line [1731](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1731) (4 lines)
+Line [1732](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1732) (4 lines)
 
 **Return**: `string`
 
@@ -536,7 +536,7 @@ Search for items in the current table
  You should use ":<placeholder>" in your sql statements to use
  prepared statements
 
-Line [1753](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1753) (57 lines)
+Line [1754](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1754) (57 lines)
 
 **Return**: `array|bool`
 
@@ -562,7 +562,7 @@ Validate a new value to be set on a property and return bool for success
  @see set()
  @throws \Exception
 
-Line [1859](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1859) (77 lines)
+Line [1860](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1860) (77 lines)
 
 **Return**: `bool`
 
@@ -581,7 +581,7 @@ Set a single property of an item.
  - validate a field if validate_regex set regex
  Opposite function of get()
 
-Line [1948](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1948) (26 lines)
+Line [1949](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1949) (26 lines)
 
 **Return**: `bool`
 
@@ -598,7 +598,7 @@ Set new values for an item.
  The general fields (id, created, updated, delete) cannot be set.
  Opposite function if getItem()
 
-Line [1982](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1982) (20 lines)
+Line [1983](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db-base.class.php#L1983) (20 lines)
 
 **Return**: `bool`
 
