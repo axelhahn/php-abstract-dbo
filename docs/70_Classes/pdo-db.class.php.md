@@ -42,7 +42,7 @@ default value:
 Constructor - sets internal environment variables and checks existence
  of the database
 
-Line [140](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L140) (21 lines)
+Line [148](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L148) (21 lines)
 
 **Return**: `void`
 
@@ -65,7 +65,7 @@ Line [140](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Write debug output if enabled by flag
 
-Line [172](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L172) (11 lines)
+Line [180](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L180) (11 lines)
 
 **Return**: `bool`
 
@@ -80,7 +80,7 @@ Line [172](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Add a log message for current object
 
-Line [192](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L192) (20 lines)
+Line [200](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L200) (20 lines)
 
 **Return**: `bool`
 
@@ -97,7 +97,7 @@ Line [192](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Create a PDO connection
 
-Line [222](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L222) (37 lines)
+Line [230](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L230) (37 lines)
 
 **Return**: `bool`
 
@@ -109,9 +109,11 @@ Line [222](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 ### 🔹 public setDebug()
 
-Enable/ disable debug; database error is visible on enabled debug only
+Enable/ disable debug; if enabled it shows database actions.
+ - Default is false (off)
+ - Preset can be set in config pdo->showdebug
 
-Line [264](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L264) (11 lines)
+Line [274](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L274) (11 lines)
 
 **Return**: `bool`
 
@@ -123,9 +125,31 @@ Line [264](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 ### 🔹 public showErrors()
 
-Enable/ disable debug; show error message if they occur
+Enable/ disable showing database error messages if they occur
+ - Default is false (off)
+ - Preset can be set in config pdo->showerrors
+ @see _log()
 
-Line [281](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L281) (7 lines)
+Line [295](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L295) (7 lines)
+
+**Return**: `bool`
+
+**Parameters**: **1** (required: 1)
+
+| Parameter | Type | Description
+|--         |--    |--
+| \<required\> $bNewValue | `bool` | flag; false = off; true = on
+
+### 🔹 public setQueryLog()
+
+Enable/ disable logging queries.
+ You should disable logging of each query on import scripts or indexers
+ in CLI mode to avoid memory leaks of stored queries.
+ - Default is true (on)
+
+ @see makeQuery()
+
+Line [314](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L314) (6 lines)
 
 **Return**: `bool`
 
@@ -140,7 +164,7 @@ Line [281](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 Get name of the current driver, eg. "mysql" or "sqlite"
  If database is initialized yet it returns false
 
-Line [298](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L298) (4 lines)
+Line [330](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L330) (4 lines)
 
 **Return**: `string|bool`
 
@@ -150,7 +174,7 @@ Line [298](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Get specialties of database properties for creating tables
 
-Line [307](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L307) (4 lines)
+Line [339](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L339) (4 lines)
 
 **Return**: `array`
 
@@ -170,7 +194,7 @@ Get the last error message (from a query or a failed method).
 
  @see lastquery()
 
-Line [322](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L322) (7 lines)
+Line [354](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L354) (7 lines)
 
 **Return**: `string`
 
@@ -196,7 +220,7 @@ Get the last query as array that can have these keys
 
  @see error()
 
-Line [347](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L347) (7 lines)
+Line [379](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L379) (7 lines)
 
 **Return**: `array|bool`
 
@@ -210,7 +234,7 @@ Line [347](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Get an array with all log messages
 
-Line [359](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L359) (4 lines)
+Line [391](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L391) (4 lines)
 
 **Return**: `array`
 
@@ -226,7 +250,7 @@ Get an array with all queries. Each entry can have these keys:
    - records {integer} count of returned records on SELECT or affected rows on INSERT, UPDATE or DELETE
    - error   {string}  optional:PDO error message
 
-Line [374](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L374) (4 lines)
+Line [406](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L406) (4 lines)
 
 **Return**: `array`
 
@@ -236,7 +260,7 @@ Line [374](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Check if a table exists in the current database.
 
-Line [389](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L389) (17 lines)
+Line [421](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L421) (17 lines)
 
 **Return**: `bool`
 
@@ -250,7 +274,7 @@ Line [389](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Get an array with all table names
 
-Line [411](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L411) (15 lines)
+Line [443](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L443) (15 lines)
 
 **Return**: `array`
 
@@ -260,7 +284,7 @@ Line [411](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 
 Execute a sql statement and put metadata / error messages into the log
 
-Line [433](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L433) (45 lines)
+Line [465](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L465) (51 lines)
 
 **Return**: `array|bool`
 
@@ -277,7 +301,7 @@ Line [433](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.cla
 Optimize database.
  The performed actions for it depend on the database type.
 
-Line [484](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L484) (46 lines)
+Line [522](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L522) (46 lines)
 
 **Return**: `array|bool`
 
@@ -290,7 +314,7 @@ Dump a database to an array.
 
  @see import()
 
-Line [540](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L540) (55 lines)
+Line [578](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L578) (55 lines)
 
 **Return**: `array|bool`
 
@@ -308,7 +332,7 @@ Dump a database to an array.
 
  @see import()
 
-Line [621](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L621) (113 lines)
+Line [659](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L659) (113 lines)
 
 **Return**: `array|bool`
 
@@ -346,7 +370,7 @@ Import data from a json file; reverse function of dump()
      ]
  @see dump()
 
-Line [825](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L825) (157 lines)
+Line [863](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L863) (157 lines)
 
 **Return**: `bool`
 
@@ -390,7 +414,7 @@ Analyze given backup file and generate a summary
      'error' => <string>,
  ]
 
-Line [1013](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L1013) (51 lines)
+Line [1051](https://github.com/axelhahn/php-abstract-dbo/blob/main/src/pdo-db.class.php#L1051) (51 lines)
 
 **Return**: `array`
 
