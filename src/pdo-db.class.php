@@ -9,7 +9,7 @@
  * Licence: GNU GPL 3.0
  * ----------------------------------------------------------------------
  * 2023-08-26  0.1  ah  first lines
- * 2026-10-10  ___  ah  last changes - add setQueryLog({bool})
+ * 2026-10-12  ___  ah  last changes
  * ======================================================================
  */
 
@@ -654,9 +654,9 @@ class pdo_db
      * @see import()
      * @param string $sOutfile  optional: output file name
      * @param array  $aTables   optional: array of tables to dump; default: false (dumps all tables)
-     * @return mixed  array of data on success or false on error
+     * @return bool  true on success or false on error
      */
-    public function dump(string $sOutfile = '', array $aTables = []): array|bool
+    public function dump(string $sOutfile = '', array $aTables = []): bool
     {
         $this->_wd(__METHOD__ . ' Writing to ' . $sOutfile . ' ' . (count($aTables) ? 'tables: ' . implode(', ', $aTables) : '(all tables)'));
 

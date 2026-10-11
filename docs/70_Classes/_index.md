@@ -11,17 +11,20 @@
 | $oDB->tableExists(TABLE)    | {bool}    | check if a table exists
 | <br>**EXECUTE**<br><br>
 | $oDB->makeQuery(SQL, DATA, TABLE) | {array}   | Execute a given query and add metadata to log
-| $oDB->dump()                | {bool}    | get an array of all tables and their rows
-| $oDB->import()              | {bool}    | import a given export file
-| $oDB->optimize()            | {array}   | optimize database; its actions depend on the database type
 | <br>**DEBUG SETTNGS**<br><br>
 | $oDB->setDebug(BOOL)        | {bool}    | enable/ disable debugging
 | $oDB->showErrors(BOOL)      | {bool}    | enable/ disable showing errors
+| $oDB->setQueryLog(BOOL)     | {bool}    | enable/ disable logging of database queries; disable it on import scripts
 | <br>**INFOS FOR DEBUGGING**<br><br>
 | $oDB->error()               | {string}  | get the last error
 | $oDB->lastquery(BOOL)       | {array}   | get an array of last query; if true, then it returns the last db error entry
 | $oDB->logs()                | {array}   | get an array of all log messages (errors and others)
 | $oDB->queries()             | {array}   | get an array of all queries
+| <br>**BACKUP**<br><br>
+| $oDB->dump(FILE, TABLES)    | {bool}    | dump database to given file; optional: limit dump to given tables
+| $oDB->import(FILE, OPTONS)  | {bool}    | import a given export file
+| $oDB->optimize()            | {array}   | optimize database; its actions depend on the database type
+| $oDB->dumpAnalyzer(FILE)    | {array}   | analyze a given backup file as array; it contains infos about the backup and its tables, records and more
 
 ### Item object
 
